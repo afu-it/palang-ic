@@ -92,8 +92,6 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
-        /* Blue checkmark circle removed - no ::before pseudo-element */
-
         .main-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -146,6 +144,7 @@
             border-radius: 2px;
             outline: none;
             cursor: pointer;
+            touch-action: none;
         }
 
         input[type="range"]::-webkit-slider-track {
@@ -218,9 +217,14 @@
             left: 100%;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -229,10 +233,15 @@
             transition: all 0.3s ease;
         }
 
-        .btn-secondary:hover {
+        .btn-secondary:hover:not(:disabled) {
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.5) 0%, rgba(79, 70, 229, 0.5) 100%);
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-danger {
@@ -243,6 +252,18 @@
         .btn-danger:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(217, 119, 6, 0.3) 100%);
+            border: 1px solid rgba(245, 158, 11, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset:hover {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.5) 0%, rgba(217, 119, 6, 0.5) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
         }
 
         .upload-area {
@@ -333,6 +354,21 @@
             background: rgba(148, 163, 184, 0.3);
         }
 
+        /* Loading spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spinner 0.6s linear infinite;
+        }
+
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+
         /* Logo watermark as background element - positioned lower */
         .logo-watermark {
             position: absolute;
@@ -405,6 +441,47 @@
 
         .glow-effect {
             animation: glow 3s ease-in-out infinite;
+        }
+
+        /* Jump to top button - Icon only, no text */
+        .jump-to-top {
+            position: fixed;
+            bottom: 80px;
+            right: 0px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.95) 100%);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(59, 130, 246, 0.5);
+            border-right: none;
+            border-radius: 12px 0 0 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .jump-to-top:hover {
+            transform: translateX(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), 0 0 30px rgba(59, 130, 246, 0.5);
+            border-color: rgba(96, 165, 250, 0.8);
+        }
+
+        .jump-to-top.show {
+            display: flex;
+        }
+
+        .jump-to-top-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
         }
 
         /* MOBILE RESPONSIVE STYLES */
@@ -506,7 +583,7 @@
                 height: 32px;
             }
 
-            .btn-primary, .btn-secondary, .btn-danger {
+            .btn-primary, .btn-secondary, .btn-danger, .btn-reset {
                 padding: 0.75rem 1rem !important;
                 font-size: 0.875rem;
             }
@@ -527,6 +604,17 @@
 
             canvas {
                 touch-action: none;
+            }
+
+            .jump-to-top {
+                bottom: 70px;
+                right: 0px;
+                padding: 10px;
+            }
+
+            .jump-to-top-icon {
+                width: 20px;
+                height: 20px;
             }
         }
 
@@ -557,6 +645,10 @@
                 width: 1.5rem !important;
                 height: 1.5rem !important;
             }
+
+            .jump-to-top {
+                bottom: 60px;
+            }
         }
     </style>
 </head>
@@ -582,14 +674,14 @@
                     </svg>
                 </p>
 
-                <!-- Privacy Info with Shield -->
+                <!-- Privacy Info with Shield - ALL 3 LINES VISIBLE ON MOBILE -->
                 <div class="privacy-info flex items-start justify-center gap-2 md:gap-3 text-xs text-slate-400 max-w-2xl mx-auto">
                     <svg class="w-6 h-6 md:w-8 md:h-8 text-green-500 flex-shrink-0 shield-glow" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0110 1.944 11.954 11.954 0 0117.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
                     <div class="privacy-info-text text-center text-xs md:text-sm">
                         <p>All your data is processed locally in your browser and never leaves your device.</p>
-                        <p class="hidden md:block">We don't store, collect, or transmit any of your personal information.</p>
+                        <p>We don't store, collect, or transmit any of your personal information.</p>
                         <p>100% secure and private.</p>
                     </div>
                 </div>
@@ -603,7 +695,7 @@
             <div id="previewSection" class="space-y-3 md:space-y-4 upload-section-centered">
 
                 <!-- Front IC -->
-                <div class="glass-card rounded-xl md:rounded-2xl p-4 md:p-6">
+                <div id="frontICSection" class="glass-card rounded-xl md:rounded-2xl p-4 md:p-6">
                     <div class="flex items-center justify-between mb-3 md:mb-4">
                         <h2 class="text-base md:text-lg font-semibold section-title">Front IC</h2>
                         <button id="deleteFront" class="hidden btn-danger text-white text-xs font-medium py-1.5 px-2 md:py-2 md:px-3 rounded-lg flex items-center gap-1 md:gap-2">
@@ -630,8 +722,9 @@
                         <div class="glass-card-light p-3 md:p-4 rounded-xl">
                             <canvas id="frontCanvas" class="w-full rounded-xl"></canvas>
                         </div>
-                        <button id="downloadFront" class="btn-primary mt-3 md:mt-4 w-full text-white font-medium py-2.5 md:py-3 px-4 md:px-6 rounded-xl text-sm">
-                            Download Front IC
+                        <button id="downloadFront" class="btn-primary mt-3 md:mt-4 w-full text-white font-medium py-2.5 md:py-3 px-4 md:px-6 rounded-xl text-sm flex items-center justify-center gap-2">
+                            <span class="btn-text">Download Front IC</span>
+                            <span class="loading-spinner hidden"></span>
                         </button>
                     </div>
                 </div>
@@ -641,26 +734,29 @@
                     <!-- First Row: Download Both & Download ZIP -->
                     <div class="grid grid-cols-2 gap-2 md:gap-3">
                         <button id="downloadBothSeparate" class="btn-secondary text-white font-medium py-2.5 md:py-3 px-3 md:px-4 rounded-xl text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2">
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 md:w-5 md:h-5 btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                             </svg>
-                            <span class="hidden sm:inline">Download Both</span>
-                            <span class="sm:hidden">Both</span>
+                            <span class="loading-spinner hidden"></span>
+                            <span class="btn-text hidden sm:inline">Download Both</span>
+                            <span class="btn-text sm:hidden">Both</span>
                         </button>
                         <button id="downloadBothZip" class="btn-secondary text-white font-medium py-2.5 md:py-3 px-3 md:px-4 rounded-xl text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2">
-                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 md:w-5 md:h-5 btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
                             </svg>
-                            <span class="hidden sm:inline">Download ZIP</span>
-                            <span class="sm:hidden">ZIP</span>
+                            <span class="loading-spinner hidden"></span>
+                            <span class="btn-text hidden sm:inline">Download ZIP</span>
+                            <span class="btn-text sm:hidden">ZIP</span>
                         </button>
                     </div>
                     <!-- Second Row: Download PDF (Full Width) -->
                     <button id="downloadPDF" class="w-full btn-secondary text-white font-medium py-2.5 md:py-3 px-3 md:px-4 rounded-xl text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2">
-                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4 md:w-5 md:h-5 btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                         </svg>
-                        Download as PDF
+                        <span class="loading-spinner hidden"></span>
+                        <span class="btn-text">Download as PDF</span>
                     </button>
                 </div>
 
@@ -692,8 +788,9 @@
                         <div class="glass-card-light p-3 md:p-4 rounded-xl">
                             <canvas id="backCanvas" class="w-full rounded-xl"></canvas>
                         </div>
-                        <button id="downloadBack" class="btn-primary mt-3 md:mt-4 w-full text-white font-medium py-2.5 md:py-3 px-4 md:px-6 rounded-xl text-sm">
-                            Download Back IC
+                        <button id="downloadBack" class="btn-primary mt-3 md:mt-4 w-full text-white font-medium py-2.5 md:py-3 px-4 md:px-6 rounded-xl text-sm flex items-center justify-center gap-2">
+                            <span class="btn-text">Download Back IC</span>
+                            <span class="loading-spinner hidden"></span>
                         </button>
                     </div>
                 </div>
@@ -703,7 +800,15 @@
             <!-- RIGHT SIDE: Settings -->
             <div id="settingsPanel" class="hidden">
                 <div class="settings-sticky glass-card rounded-xl md:rounded-2xl p-4 md:p-6">
-                    <h2 class="text-base md:text-lg font-semibold mb-4 md:mb-5 section-title">Watermark Settings</h2>
+                    <div class="flex items-center justify-between mb-4 md:mb-5">
+                        <h2 class="text-base md:text-lg font-semibold section-title">Watermark Settings</h2>
+                        <button id="resetSettings" class="btn-reset text-white text-xs font-medium py-1.5 px-3 rounded-lg flex items-center gap-2">
+                            <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            <span>Reset</span>
+                        </button>
+                    </div>
 
                     <div class="mb-4 md:mb-5">
                         <label class="block text-xs font-medium mb-2 md:mb-3 text-slate-300">Quick Templates</label>
@@ -807,9 +912,9 @@
                     <div class="mb-4 md:mb-5">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-xs font-medium text-slate-300">Line Thickness</label>
-                            <span id="lineThicknessValue" class="badge px-2 md:px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">7px</span>
+                            <span id="lineThicknessValue" class="badge px-2 md:px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">5px</span>
                         </div>
-                        <input type="range" id="lineThickness" min="1" max="15" value="7" class="w-full">
+                        <input type="range" id="lineThickness" min="1" max="15" value="5" class="w-full">
                     </div>
 
                     <div class="divider my-4 md:my-5"></div>
@@ -859,6 +964,15 @@
         </div>
     </div>
 
+    <!-- Jump to Top Button (Mobile Only) - ICON ONLY -->
+    <div id="jumpToTop" class="jump-to-top">
+        <div class="jump-to-top-icon">
+            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+            </svg>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
@@ -872,6 +986,34 @@
             } else {
                 headerContainer.classList.remove('scrolled');
             }
+        });
+
+        // Jump to top button (Mobile only) - scrolls to Front IC section
+        var jumpToTopBtn = document.getElementById('jumpToTop');
+        var settingsPanel = document.getElementById('settingsPanel');
+
+        function updateJumpButton() {
+            if (window.innerWidth <= 768 && !settingsPanel.classList.contains('hidden')) {
+                var scrollPosition = window.scrollY;
+                // Show button when scrolled down (more than 200px from top)
+                if (scrollPosition > 200) {
+                    jumpToTopBtn.classList.add('show');
+                } else {
+                    jumpToTopBtn.classList.remove('show');
+                }
+            } else {
+                jumpToTopBtn.classList.remove('show');
+            }
+        }
+
+        window.addEventListener('scroll', updateJumpButton);
+        window.addEventListener('resize', updateJumpButton);
+
+        jumpToTopBtn.addEventListener('click', function() {
+            var frontICSection = document.getElementById('frontICSection');
+            var yOffset = -20; // 20px above the section
+            var y = frontICSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
         });
 
         var frontImage = null;
@@ -907,7 +1049,6 @@
         var bgColorPicker = document.getElementById("bgColorPicker");
         var selectedBgColorHex = document.getElementById("selectedBgColorHex");
         var bgOpacityInput = document.getElementById("bgOpacity");
-        var settingsPanel = document.getElementById("settingsPanel");
         var previewSection = document.getElementById("previewSection");
         var mainContainer = document.getElementById("mainContainer");
         var sizeValue = document.getElementById("sizeValue");
@@ -921,6 +1062,87 @@
 
         var frontCanvas = document.getElementById("frontCanvas");
         var backCanvas = document.getElementById("backCanvas");
+
+        // Reset button functionality
+        document.getElementById('resetSettings').addEventListener('click', function() {
+            // Reset all values to defaults
+            watermarkTextInput.value = "FOR PRIVATE USE ONLY";
+            watermarkSizeInput.value = 40;
+            rotationInput.value = -45;
+            opacityInput.value = 1;
+            lineThicknessInput.value = 5;
+            paddingSizeInput.value = 180;
+            cornerRadiusInput.value = 50;
+            bgOpacityInput.value = 0.3;
+
+            customColorPicker.value = "#000000";
+            bgColorPicker.value = "#FFFFFF";
+            currentColor = "#000000";
+            textBgColor = "#FFFFFF";
+            textBgOpacity = 0.3;
+
+            whiteBackgroundEnabled = true;
+            roundedCornersEnabled = true;
+            textBackgroundEnabled = true;
+
+            whiteBackgroundToggle.classList.add('active');
+            roundedCornersToggle.classList.add('active');
+            textBackgroundToggle.classList.add('active');
+
+            paddingControl.classList.remove('hidden');
+            cornerRadiusControl.classList.remove('hidden');
+            textBackgroundControl.classList.remove('hidden');
+
+            // Reset watermark positions
+            frontWatermarkPos = { x: 100, y: 100 };
+            backWatermarkPos = { x: 100, y: 100 };
+
+            // Update display values
+            sizeValue.textContent = "40px";
+            rotationValue.textContent = "-45°";
+            opacityValue.textContent = "1.0";
+            lineThicknessValue.textContent = "5px";
+            paddingValue.textContent = "180px";
+            cornerRadiusValue.textContent = "50px";
+            bgOpacityValue.textContent = "0.3";
+            selectedColorHex.textContent = "#000000";
+            selectedBgColorHex.textContent = "#FFFFFF";
+
+            // Reset color presets
+            document.querySelectorAll('.color-preset').forEach(function(preset) {
+                preset.classList.remove('active');
+            });
+            document.querySelector('.color-preset[data-color="#000000"]').classList.add('active');
+
+            // Reset template selection
+            document.querySelectorAll('.template-option').forEach(function(option) {
+                option.classList.remove('selected');
+            });
+            document.querySelector('.template-option[data-template="FOR PRIVATE USE ONLY"]').classList.add('selected');
+
+            // Re-render canvases
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        // Loading state helper
+        function setButtonLoading(button, isLoading) {
+            var btnText = button.querySelectorAll('.btn-text');
+            var btnIcon = button.querySelector('.btn-icon');
+            var spinner = button.querySelector('.loading-spinner');
+
+            if (isLoading) {
+                button.disabled = true;
+                btnText.forEach(function(text) { text.classList.add('hidden'); });
+                if (btnIcon) btnIcon.classList.add('hidden');
+                spinner.classList.remove('hidden');
+            } else {
+                button.disabled = false;
+                btnText.forEach(function(text) { text.classList.remove('hidden'); });
+                if (btnIcon) btnIcon.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }
+        }
 
         // Function to process uploaded file
         function processImageFile(file, side) {
@@ -950,6 +1172,7 @@
                         document.getElementById("deleteBack").classList.remove("hidden");
                     }
                     updateBulkDownloadSection();
+                    updateJumpButton();
                 };
                 img.src = readerEvent.target.result;
             };
@@ -1198,12 +1421,14 @@
             settingsPanel.classList.remove("hidden");
             mainContainer.classList.remove("centered");
             previewSection.classList.remove("upload-section-centered");
+            updateJumpButton();
         }
 
         function hideSettingsPanel() {
             settingsPanel.classList.add("hidden");
             mainContainer.classList.add("centered");
             previewSection.classList.add("upload-section-centered");
+            updateJumpButton();
         }
 
         function updateBulkDownloadSection() {
@@ -1457,23 +1682,39 @@
             if (backImage) renderCanvas("back", backImage);
         });
 
+        // Download button handlers with loading animation
         document.getElementById("downloadFront").addEventListener("click", function() {
-            var canvas = document.getElementById("frontCanvas");
-            var link = document.createElement("a");
-            link.download = "ic-front-watermarked.png";
-            link.href = canvas.toDataURL("image/png");
-            link.click();
+            var button = this;
+            setButtonLoading(button, true);
+
+            setTimeout(function() {
+                var canvas = document.getElementById("frontCanvas");
+                var link = document.createElement("a");
+                link.download = "ic-front-watermarked.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+                setButtonLoading(button, false);
+            }, 300);
         });
 
         document.getElementById("downloadBack").addEventListener("click", function() {
-            var canvas = document.getElementById("backCanvas");
-            var link = document.createElement("a");
-            link.download = "ic-back-watermarked.png";
-            link.href = canvas.toDataURL("image/png");
-            link.click();
+            var button = this;
+            setButtonLoading(button, true);
+
+            setTimeout(function() {
+                var canvas = document.getElementById("backCanvas");
+                var link = document.createElement("a");
+                link.download = "ic-back-watermarked.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+                setButtonLoading(button, false);
+            }, 300);
         });
 
         document.getElementById("downloadBothSeparate").addEventListener("click", function() {
+            var button = this;
+            setButtonLoading(button, true);
+
             var frontCanvas = document.getElementById("frontCanvas");
             var backCanvas = document.getElementById("backCanvas");
 
@@ -1489,60 +1730,93 @@
                 link.download = "ic-back-watermarked.png";
                 link.href = backCanvas.toDataURL("image/png");
                 link.click();
-            }, 500);
+                setButtonLoading(button, false);
+            }, 800);
         });
 
         document.getElementById("downloadBothZip").addEventListener("click", function() {
+            var button = this;
+            setButtonLoading(button, true);
+
             var frontCanvas = document.getElementById("frontCanvas");
             var backCanvas = document.getElementById("backCanvas");
             var zip = new JSZip();
-            zip.file("ic-back.png", backCanvas.toDataURL("image/png").split(',')[1], { base64: true });
+
             zip.file("ic-front.png", frontCanvas.toDataURL("image/png").split(',')[1], { base64: true });
+            zip.file("ic-back.png", backCanvas.toDataURL("image/png").split(',')[1], { base64: true });
+
             zip.generateAsync({ type: "blob" }).then(function(content) {
                 var link = document.createElement("a");
                 link.href = URL.createObjectURL(content);
                 link.download = "ic-watermarked.zip";
                 link.click();
+                setButtonLoading(button, false);
             });
         });
 
         document.getElementById("downloadPDF").addEventListener("click", function() {
-            var frontCanvas = document.getElementById("frontCanvas");
-            var backCanvas = document.getElementById("backCanvas");
+            var button = this;
+            setButtonLoading(button, true);
 
-            var frontImgData = frontCanvas.toDataURL('image/png');
-            var backImgData = backCanvas.toDataURL('image/png');
+            setTimeout(function() {
+                var frontCanvas = document.getElementById("frontCanvas");
+                var backCanvas = document.getElementById("backCanvas");
 
-            var { jsPDF } = window.jspdf;
-            var pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4'
-            });
+                var frontImgData = frontCanvas.toDataURL('image/png');
+                var backImgData = backCanvas.toDataURL('image/png');
 
-            var pageWidth = 210;
-            var pageHeight = 297;
-            var margin = 20;
-            var maxWidth = (pageWidth - (margin * 2)) * 0.8;
+                var { jsPDF } = window.jspdf;
+                var pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
 
-            var currentY = margin + 10;
+                var pageWidth = 210;
+                var pageHeight = 297;
+                var margin = 20;
 
-            var frontAspect = frontCanvas.width / frontCanvas.height;
-            var frontWidth = maxWidth;
-            var frontHeight = frontWidth / frontAspect;
-            var frontX = (pageWidth - frontWidth) / 2;
+                // Calculate available space for each IC (half the page height minus margins)
+                var availableHeight = (pageHeight - (margin * 3)) / 2; // Divide by 2 for two ICs, 3 margins (top, middle, bottom)
+                var maxWidth = pageWidth - (margin * 2);
 
-            pdf.addImage(frontImgData, 'PNG', frontX, currentY, frontWidth, frontHeight);
-            currentY += frontHeight + 20;
+                // FRONT IC - Top half of page
+                var frontAspect = frontCanvas.width / frontCanvas.height;
+                var frontWidth = maxWidth;
+                var frontHeight = frontWidth / frontAspect;
 
-            var backAspect = backCanvas.width / backCanvas.height;
-            var backWidth = maxWidth;
-            var backHeight = backWidth / backAspect;
-            var backX = (pageWidth - backWidth) / 2;
+                // If height exceeds available space, scale down
+                if (frontHeight > availableHeight) {
+                    frontHeight = availableHeight;
+                    frontWidth = frontHeight * frontAspect;
+                }
 
-            pdf.addImage(backImgData, 'PNG', backX, currentY, backWidth, backHeight);
+                // Center horizontally and vertically in top half
+                var frontX = (pageWidth - frontWidth) / 2;
+                var frontY = margin + (availableHeight - frontHeight) / 2;
 
-            pdf.save('mykad-palang-ic.pdf');
+                pdf.addImage(frontImgData, 'PNG', frontX, frontY, frontWidth, frontHeight);
+
+                // BACK IC - Bottom half of page
+                var backAspect = backCanvas.width / backCanvas.height;
+                var backWidth = maxWidth;
+                var backHeight = backWidth / backAspect;
+
+                // If height exceeds available space, scale down
+                if (backHeight > availableHeight) {
+                    backHeight = availableHeight;
+                    backWidth = backHeight * backAspect;
+                }
+
+                // Center horizontally and vertically in bottom half
+                var backX = (pageWidth - backWidth) / 2;
+                var backY = pageHeight / 2 + (availableHeight - backHeight) / 2;
+
+                pdf.addImage(backImgData, 'PNG', backX, backY, backWidth, backHeight);
+
+                pdf.save('mykad-palang-ic.pdf');
+                setButtonLoading(button, false);
+            }, 500);
         });
     </script>
 </body>
