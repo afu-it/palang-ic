@@ -1020,7 +1020,7 @@
             window.scrollTo({ top: y, behavior: 'smooth' });
         });
 
-        // SLIDER DELAY MECHANISM - Prevents accidental value changes when scrolling
+        // SLIDER DELAY MECHANISM - 2 SECONDS - Prevents accidental value changes when scrolling
         var sliderHoldTimers = {};
         var sliderCanChange = {};
 
@@ -1037,10 +1037,10 @@
                     clearTimeout(sliderHoldTimers[sliderId]);
                 }
 
-                // Set 1 second timer
+                // Set 2 second timer
                 sliderHoldTimers[sliderId] = setTimeout(function() {
                     sliderCanChange[sliderId] = true;
-                }, 1000);
+                }, 2000);
             });
 
             slider.addEventListener('touchend', function() {
@@ -1051,7 +1051,7 @@
             });
 
             slider.addEventListener('touchmove', function(e) {
-                // Only allow slider movement if held for 1 second
+                // Only allow slider movement if held for 2 seconds
                 if (!sliderCanChange[sliderId]) {
                     e.preventDefault();
                     e.stopPropagation();
