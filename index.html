@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Palang IC - MyKad Watermark Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -35,7 +36,6 @@
             max-width: 100%;
             height: auto;
             border-radius: 1rem;
-            cursor: move;
             transition: transform 0.2s ease;
         }
 
@@ -104,7 +104,7 @@
             border-radius: 50%;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-center;
             font-size: 10px;
             font-weight: bold;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
@@ -153,7 +153,6 @@
             background: linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%);
         }
 
-        /* THIN GREY SLIDER - MATCHING DESIGN */
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
@@ -344,7 +343,6 @@
             background: rgba(148, 163, 184, 0.3);
         }
 
-        /* Logo Watermark Style */
         .logo-watermark {
             display: inline-block;
             position: relative;
@@ -371,7 +369,6 @@
             bottom: -10px;
         }
 
-        /* Shield Glow */
         .shield-glow {
             filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.8)) 
                     drop-shadow(0 0 16px rgba(34, 197, 94, 0.5));
@@ -384,43 +381,6 @@
 
         .glow-effect {
             animation: glow 3s ease-in-out infinite;
-        }
-
-        /* PDF Export Container */
-        #pdfContainer {
-            display: none;
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-            background: white;
-            padding: 40px;
-            width: 210mm;
-            height: 297mm;
-            box-sizing: border-box;
-        }
-
-        .pdf-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            height: 100%;
-            gap: 60px;
-        }
-
-        .pdf-image {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .download-section {
-            display: flex;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-
-        .download-btn {
-            flex: 1;
         }
     </style>
 </head>
@@ -480,7 +440,6 @@
                         </button>
                     </div>
 
-                    <!-- Upload Area -->
                     <div id="frontUploadArea" class="upload-area rounded-xl p-10 text-center cursor-pointer">
                         <input type="file" id="frontUpload" accept="image/*" class="hidden">
                         <label for="frontUpload" class="cursor-pointer block">
@@ -494,7 +453,6 @@
                         </label>
                     </div>
 
-                    <!-- Canvas Preview -->
                     <div id="frontPreview" class="hidden mt-4">
                         <div class="glass-card-light p-4 rounded-xl">
                             <canvas id="frontCanvas" class="w-full rounded-xl"></canvas>
@@ -506,21 +464,29 @@
                 </div>
 
                 <!-- BULK DOWNLOAD BUTTONS -->
-                <div id="bulkDownloadSection" class="hidden">
-                    <div class="download-section">
-                        <button id="downloadBoth" class="download-btn btn-secondary text-white font-medium py-3 px-6 rounded-xl text-sm flex items-center justify-center gap-2">
+                <div id="bulkDownloadSection" class="hidden space-y-3">
+                    <!-- First Row: Download Both & Download ZIP -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="downloadBothSeparate" class="btn-secondary text-white font-medium py-3 px-4 rounded-xl text-sm flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                             </svg>
-                            Download Both (ZIP)
+                            Download Both
                         </button>
-                        <button id="downloadPDF" class="download-btn btn-secondary text-white font-medium py-3 px-6 rounded-xl text-sm flex items-center justify-center gap-2">
+                        <button id="downloadBothZip" class="btn-secondary text-white font-medium py-3 px-4 rounded-xl text-sm flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
                             </svg>
-                            Download as PDF
+                            Download ZIP
                         </button>
                     </div>
+                    <!-- Second Row: Download PDF (Full Width) -->
+                    <button id="downloadPDF" class="w-full btn-secondary text-white font-medium py-3 px-4 rounded-xl text-sm flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        Download as PDF
+                    </button>
                 </div>
 
                 <!-- Back IC -->
@@ -534,7 +500,6 @@
                         </button>
                     </div>
 
-                    <!-- Upload Area -->
                     <div id="backUploadArea" class="upload-area rounded-xl p-10 text-center cursor-pointer">
                         <input type="file" id="backUpload" accept="image/*" class="hidden">
                         <label for="backUpload" class="cursor-pointer block">
@@ -548,7 +513,6 @@
                         </label>
                     </div>
 
-                    <!-- Canvas Preview -->
                     <div id="backPreview" class="hidden mt-4">
                         <div class="glass-card-light p-4 rounded-xl">
                             <canvas id="backCanvas" class="w-full rounded-xl"></canvas>
@@ -561,12 +525,11 @@
 
             </div>
 
-            <!-- RIGHT SIDE: Settings (hidden initially) -->
+            <!-- RIGHT SIDE: Settings -->
             <div id="settingsPanel" class="hidden">
                 <div class="settings-sticky glass-card rounded-2xl p-6">
                     <h2 class="text-lg font-semibold mb-5 section-title">Watermark Settings</h2>
 
-                    <!-- Watermark Templates -->
                     <div class="mb-5">
                         <label class="block text-xs font-medium mb-3 text-slate-300">Quick Templates</label>
                         <div class="grid grid-cols-2 gap-2">
@@ -591,13 +554,11 @@
                         </div>
                     </div>
 
-                    <!-- Watermark Text -->
                     <div class="mb-5">
                         <label class="block text-xs font-medium mb-2 text-slate-300">Custom Text (Press Enter for 2nd line)</label>
                         <textarea id="watermarkText" rows="2" placeholder="Enter watermark text..." class="w-full px-4 py-2.5 text-sm bg-slate-800/50 border border-slate-700/50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-slate-500 resize-none">FOR PRIVATE USE ONLY</textarea>
                     </div>
 
-                    <!-- Color Selection -->
                     <div class="mb-5">
                         <label class="block text-xs font-medium mb-2 text-slate-300">Color</label>
                         <div class="flex gap-2 mb-3">
@@ -621,7 +582,6 @@
                         </div>
                     </div>
 
-                    <!-- Text Background -->
                     <div class="mb-5">
                         <div class="flex items-center justify-between mb-3">
                             <label class="text-xs font-medium text-slate-300">Text Background</label>
@@ -645,16 +605,14 @@
                         </div>
                     </div>
 
-                    <!-- Size -->
                     <div class="mb-5">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-xs font-medium text-slate-300">Size</label>
-                            <span id="sizeValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">48px</span>
+                            <span id="sizeValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">40px</span>
                         </div>
-                        <input type="range" id="watermarkSize" min="20" max="120" value="48" class="w-full">
+                        <input type="range" id="watermarkSize" min="20" max="120" value="40" class="w-full">
                     </div>
 
-                    <!-- Rotation -->
                     <div class="mb-5">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-xs font-medium text-slate-300">Rotation</label>
@@ -663,7 +621,6 @@
                         <input type="range" id="rotation" min="-180" max="180" value="-45" class="w-full">
                     </div>
 
-                    <!-- Opacity -->
                     <div class="mb-5">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-xs font-medium text-slate-300">Opacity</label>
@@ -672,7 +629,6 @@
                         <input type="range" id="opacity" min="0.1" max="1" step="0.1" value="1" class="w-full">
                     </div>
 
-                    <!-- Line Thickness -->
                     <div class="mb-5">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-xs font-medium text-slate-300">Line Thickness</label>
@@ -683,7 +639,6 @@
 
                     <div class="divider my-5"></div>
 
-                    <!-- White Background -->
                     <div class="mb-5">
                         <div class="flex items-center justify-between mb-3">
                             <label class="text-xs font-medium text-slate-300">White Background</label>
@@ -700,7 +655,6 @@
                         </div>
                     </div>
 
-                    <!-- Rounded Corners -->
                     <div class="mb-5">
                         <div class="flex items-center justify-between mb-3">
                             <label class="text-xs font-medium text-slate-300">Rounded Corners</label>
@@ -721,15 +675,6 @@
 
         </div>
 
-        <!-- PDF Container (Hidden) -->
-        <div id="pdfContainer">
-            <div class="pdf-content">
-                <img id="pdfFrontImg" class="pdf-image" alt="Front IC">
-                <img id="pdfBackImg" class="pdf-image" alt="Back IC">
-            </div>
-        </div>
-
-        <!-- Footer -->
         <div class="text-center mt-8 space-y-2">
             <p class="text-slate-500 text-xs">🔒 Privacy First: All images are processed locally in your browser</p>
             <div class="flex items-center justify-center gap-2 text-xs text-slate-600">
@@ -739,16 +684,15 @@
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-
     <script>
         var frontImage = null;
         var backImage = null;
         var frontWatermarkPos = { x: 100, y: 100 };
         var backWatermarkPos = { x: 100, y: 100 };
         var isDragging = false;
-        var currentSide = null;
-        var dragOffset = { x: 0, y: 0 };
+        var currentCanvas = null;
+        var dragOffsetX = 0;
+        var dragOffsetY = 0;
         var currentColor = "#000000";
         var whiteBackgroundEnabled = true;
         var roundedCornersEnabled = true;
@@ -777,7 +721,6 @@
         var settingsPanel = document.getElementById("settingsPanel");
         var previewSection = document.getElementById("previewSection");
         var mainContainer = document.getElementById("mainContainer");
-
         var sizeValue = document.getElementById("sizeValue");
         var rotationValue = document.getElementById("rotationValue");
         var opacityValue = document.getElementById("opacityValue");
@@ -785,10 +728,115 @@
         var paddingValue = document.getElementById("paddingValue");
         var cornerRadiusValue = document.getElementById("cornerRadiusValue");
         var bgOpacityValue = document.getElementById("bgOpacityValue");
-
         var bulkDownloadSection = document.getElementById("bulkDownloadSection");
 
-        // Template Selection
+        var frontCanvas = document.getElementById("frontCanvas");
+        var backCanvas = document.getElementById("backCanvas");
+
+        // Function to get canvas coordinates accounting for scaling
+        function getCanvasCoordinates(canvas, clientX, clientY) {
+            var rect = canvas.getBoundingClientRect();
+            var scaleX = canvas.width / rect.width;
+            var scaleY = canvas.height / rect.height;
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        // Function to check if mouse is near watermark (accounting for canvas scaling)
+        function isMouseNearWatermark(canvasX, canvasY, wmX, wmY) {
+            var distance = Math.sqrt(Math.pow(canvasX - wmX, 2) + Math.pow(canvasY - wmY, 2));
+            return distance < 150; // Hit area in canvas pixels
+        }
+
+        // DRAGGING FUNCTIONALITY
+        function setupCanvasDragging(canvas, side) {
+            canvas.addEventListener("mousemove", function(e) {
+                var coords = getCanvasCoordinates(canvas, e.clientX, e.clientY);
+                var pos = side === "front" ? frontWatermarkPos : backWatermarkPos;
+                var padding = whiteBackgroundEnabled ? parseInt(paddingSizeInput.value) : 0;
+                var adjustedX = whiteBackgroundEnabled ? pos.x + padding : pos.x;
+                var adjustedY = whiteBackgroundEnabled ? pos.y + padding : pos.y;
+
+                if (!isDragging && isMouseNearWatermark(coords.x, coords.y, adjustedX, adjustedY)) {
+                    canvas.style.cursor = "grab";
+                } else if (!isDragging) {
+                    canvas.style.cursor = "default";
+                }
+            });
+
+            canvas.addEventListener("mousedown", function(e) {
+                var coords = getCanvasCoordinates(canvas, e.clientX, e.clientY);
+                var pos = side === "front" ? frontWatermarkPos : backWatermarkPos;
+                var padding = whiteBackgroundEnabled ? parseInt(paddingSizeInput.value) : 0;
+                var adjustedX = whiteBackgroundEnabled ? pos.x + padding : pos.x;
+                var adjustedY = whiteBackgroundEnabled ? pos.y + padding : pos.y;
+
+                if (isMouseNearWatermark(coords.x, coords.y, adjustedX, adjustedY)) {
+                    isDragging = true;
+                    currentCanvas = side;
+                    dragOffsetX = coords.x - adjustedX;
+                    dragOffsetY = coords.y - adjustedY;
+                    canvas.style.cursor = "grabbing";
+                    e.preventDefault();
+                }
+            });
+
+            canvas.addEventListener("mousemove", function(e) {
+                if (isDragging && currentCanvas === side) {
+                    var coords = getCanvasCoordinates(canvas, e.clientX, e.clientY);
+                    var padding = whiteBackgroundEnabled ? parseInt(paddingSizeInput.value) : 0;
+                    var newX = coords.x - dragOffsetX;
+                    var newY = coords.y - dragOffsetY;
+
+                    if (whiteBackgroundEnabled) {
+                        newX -= padding;
+                        newY -= padding;
+                    }
+
+                    if (side === "front") {
+                        frontWatermarkPos = { x: newX, y: newY };
+                        renderCanvas("front", frontImage);
+                    } else {
+                        backWatermarkPos = { x: newX, y: newY };
+                        renderCanvas("back", backImage);
+                    }
+                    e.preventDefault();
+                }
+            });
+
+            canvas.addEventListener("mouseup", function(e) {
+                if (isDragging) {
+                    isDragging = false;
+                    currentCanvas = null;
+
+                    var coords = getCanvasCoordinates(canvas, e.clientX, e.clientY);
+                    var pos = side === "front" ? frontWatermarkPos : backWatermarkPos;
+                    var padding = whiteBackgroundEnabled ? parseInt(paddingSizeInput.value) : 0;
+                    var adjustedX = whiteBackgroundEnabled ? pos.x + padding : pos.x;
+                    var adjustedY = whiteBackgroundEnabled ? pos.y + padding : pos.y;
+
+                    if (isMouseNearWatermark(coords.x, coords.y, adjustedX, adjustedY)) {
+                        canvas.style.cursor = "grab";
+                    } else {
+                        canvas.style.cursor = "default";
+                    }
+                }
+            });
+
+            canvas.addEventListener("mouseleave", function() {
+                if (isDragging) {
+                    isDragging = false;
+                    currentCanvas = null;
+                }
+                canvas.style.cursor = "default";
+            });
+        }
+
+        setupCanvasDragging(frontCanvas, "front");
+        setupCanvasDragging(backCanvas, "back");
+
         var templateOptions = document.querySelectorAll(".template-option");
         for (var i = 0; i < templateOptions.length; i++) {
             templateOptions[i].addEventListener("click", function() {
@@ -796,8 +844,7 @@
                     templateOptions[j].classList.remove("selected");
                 }
                 this.classList.add("selected");
-                var templateText = this.getAttribute("data-template");
-                watermarkTextInput.value = templateText;
+                watermarkTextInput.value = this.getAttribute("data-template");
                 if (frontImage) renderCanvas("front", frontImage);
                 if (backImage) renderCanvas("back", backImage);
             });
@@ -830,10 +877,7 @@
             document.getElementById("deleteFront").classList.add("hidden");
             document.getElementById("frontUpload").value = "";
             updateBulkDownloadSection();
-
-            if (!frontImage && !backImage) {
-                hideSettingsPanel();
-            }
+            if (!frontImage && !backImage) hideSettingsPanel();
         });
 
         document.getElementById("deleteBack").addEventListener("click", function() {
@@ -843,16 +887,12 @@
             document.getElementById("deleteBack").classList.add("hidden");
             document.getElementById("backUpload").value = "";
             updateBulkDownloadSection();
-
-            if (!frontImage && !backImage) {
-                hideSettingsPanel();
-            }
+            if (!frontImage && !backImage) hideSettingsPanel();
         });
 
         document.getElementById("frontUpload").addEventListener("change", function(e) {
             var file = e.target.files[0];
             if (!file) return;
-
             var reader = new FileReader();
             reader.onload = function(readerEvent) {
                 var img = new Image();
@@ -874,7 +914,6 @@
         document.getElementById("backUpload").addEventListener("change", function(e) {
             var file = e.target.files[0];
             if (!file) return;
-
             var reader = new FileReader();
             reader.onload = function(readerEvent) {
                 var img = new Image();
@@ -920,13 +959,8 @@
 
         textBackgroundToggle.addEventListener("click", function() {
             textBackgroundEnabled = !textBackgroundEnabled;
-            if (textBackgroundEnabled) {
-                this.classList.add("active");
-                textBackgroundControl.classList.remove("hidden");
-            } else {
-                this.classList.remove("active");
-                textBackgroundControl.classList.add("hidden");
-            }
+            this.classList.toggle("active", textBackgroundEnabled);
+            textBackgroundControl.classList.toggle("hidden", !textBackgroundEnabled);
             if (frontImage) renderCanvas("front", frontImage);
             if (backImage) renderCanvas("back", backImage);
         });
@@ -949,17 +983,14 @@
             var canvasId = side === "front" ? "frontCanvas" : "backCanvas";
             var canvas = document.getElementById(canvasId);
             var ctx = canvas.getContext("2d");
-
             var padding = whiteBackgroundEnabled ? parseInt(paddingSizeInput.value) : 0;
             var cornerRadius = roundedCornersEnabled ? parseInt(cornerRadiusInput.value) : 0;
 
             if (whiteBackgroundEnabled) {
                 canvas.width = img.width + (padding * 2);
                 canvas.height = img.height + (padding * 2);
-
                 ctx.fillStyle = "#FFFFFF";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-
                 ctx.save();
                 if (roundedCornersEnabled) {
                     roundRect(ctx, padding, padding, img.width, img.height, cornerRadius);
@@ -970,7 +1001,6 @@
             } else {
                 canvas.width = img.width;
                 canvas.height = img.height;
-
                 ctx.save();
                 if (roundedCornersEnabled) {
                     roundRect(ctx, 0, 0, img.width, img.height, cornerRadius);
@@ -1008,7 +1038,6 @@
             var opacity = parseFloat(opacityInput.value);
             var lineThickness = parseInt(lineThicknessInput.value);
             var color = currentColor;
-
             var r = parseInt(color.substr(1, 2), 16);
             var g = parseInt(color.substr(3, 2), 16);
             var b = parseInt(color.substr(5, 2), 16);
@@ -1033,18 +1062,11 @@
                 var bgR = parseInt(textBgColor.substr(1, 2), 16);
                 var bgG = parseInt(textBgColor.substr(3, 2), 16);
                 var bgB = parseInt(textBgColor.substr(5, 2), 16);
-
                 var bgPadding = 10;
                 var topLineOffset = -totalHeight / 2 - 15;
                 var bottomLineOffset = totalHeight / 2 + 15;
-
                 ctx.fillStyle = "rgba(" + bgR + "," + bgG + "," + bgB + "," + textBgOpacity + ")";
-                ctx.fillRect(
-                    -lineLength / 2 - bgPadding,
-                    topLineOffset,
-                    lineLength + (bgPadding * 2),
-                    bottomLineOffset - topLineOffset
-                );
+                ctx.fillRect(-lineLength / 2 - bgPadding, topLineOffset, lineLength + (bgPadding * 2), bottomLineOffset - topLineOffset);
             }
 
             ctx.fillStyle = "rgba(" + r + "," + g + "," + b + "," + opacity + ")";
@@ -1133,11 +1155,10 @@
             if (backImage) renderCanvas("back", backImage);
         });
 
-        // Download Individual
         document.getElementById("downloadFront").addEventListener("click", function() {
             var canvas = document.getElementById("frontCanvas");
             var link = document.createElement("a");
-            link.download = "ic-front-crossed.png";
+            link.download = "ic-front-watermarked.png";
             link.href = canvas.toDataURL("image/png");
             link.click();
         });
@@ -1145,20 +1166,36 @@
         document.getElementById("downloadBack").addEventListener("click", function() {
             var canvas = document.getElementById("backCanvas");
             var link = document.createElement("a");
-            link.download = "ic-back-crossed.png";
+            link.download = "ic-back-watermarked.png";
             link.href = canvas.toDataURL("image/png");
             link.click();
         });
 
-        // Download Both as ZIP
-        document.getElementById("downloadBoth").addEventListener("click", function() {
+        document.getElementById("downloadBothSeparate").addEventListener("click", function() {
             var frontCanvas = document.getElementById("frontCanvas");
             var backCanvas = document.getElementById("backCanvas");
 
-            var zip = new JSZip();
-            zip.file("ic-front.png", frontCanvas.toDataURL("image/png").split(',')[1], { base64: true });
-            zip.file("ic-back.png", backCanvas.toDataURL("image/png").split(',')[1], { base64: true });
+            setTimeout(function() {
+                var link = document.createElement("a");
+                link.download = "ic-front-watermarked.png";
+                link.href = frontCanvas.toDataURL("image/png");
+                link.click();
+            }, 100);
 
+            setTimeout(function() {
+                var link = document.createElement("a");
+                link.download = "ic-back-watermarked.png";
+                link.href = backCanvas.toDataURL("image/png");
+                link.click();
+            }, 500);
+        });
+
+        document.getElementById("downloadBothZip").addEventListener("click", function() {
+            var frontCanvas = document.getElementById("frontCanvas");
+            var backCanvas = document.getElementById("backCanvas");
+            var zip = new JSZip();
+            zip.file("ic-back.png", backCanvas.toDataURL("image/png").split(',')[1], { base64: true });
+            zip.file("ic-front.png", frontCanvas.toDataURL("image/png").split(',')[1], { base64: true });
             zip.generateAsync({ type: "blob" }).then(function(content) {
                 var link = document.createElement("a");
                 link.href = URL.createObjectURL(content);
@@ -1167,24 +1204,43 @@
             });
         });
 
-        // Download as PDF (A4)
         document.getElementById("downloadPDF").addEventListener("click", function() {
             var frontCanvas = document.getElementById("frontCanvas");
             var backCanvas = document.getElementById("backCanvas");
 
-            document.getElementById("pdfFrontImg").src = frontCanvas.toDataURL("image/png");
-            document.getElementById("pdfBackImg").src = backCanvas.toDataURL("image/png");
+            var frontImgData = frontCanvas.toDataURL('image/png');
+            var backImgData = backCanvas.toDataURL('image/png');
 
-            var element = document.getElementById("pdfContainer");
-            var opt = {
-                margin: 10,
-                filename: "ic-watermarked.pdf",
-                image: { type: "png", quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
-            };
+            var { jsPDF } = window.jspdf;
+            var pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
 
-            html2pdf().set(opt).from(element).save();
+            var pageWidth = 210;
+            var pageHeight = 297;
+            var margin = 20;
+            var maxWidth = (pageWidth - (margin * 2)) * 0.8;
+
+            var currentY = margin + 10;
+
+            var frontAspect = frontCanvas.width / frontCanvas.height;
+            var frontWidth = maxWidth;
+            var frontHeight = frontWidth / frontAspect;
+            var frontX = (pageWidth - frontWidth) / 2;
+
+            pdf.addImage(frontImgData, 'PNG', frontX, currentY, frontWidth, frontHeight);
+            currentY += frontHeight + 20;
+
+            var backAspect = backCanvas.width / backCanvas.height;
+            var backWidth = maxWidth;
+            var backHeight = backWidth / backAspect;
+            var backX = (pageWidth - backWidth) / 2;
+
+            pdf.addImage(backImgData, 'PNG', backX, currentY, backWidth, backHeight);
+
+            pdf.save('mykad-palang-ic.pdf');
         });
     </script>
 </body>
