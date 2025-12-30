@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palang IC - MyKad Watermark Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card-light {
+            background: rgba(51, 65, 85, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 1rem;
+            cursor: move;
+            transition: transform 0.2s ease;
+        }
+
+        canvas:hover {
+            transform: scale(1.01);
+        }
+
+        .color-preset {
+            width: 36px;
+            height: 36px;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .color-preset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .color-preset.active {
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            transform: scale(1.05);
+        }
+
+        .template-option {
+            background: rgba(51, 65, 85, 0.4);
+            border: 2px solid rgba(148, 163, 184, 0.3);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            position: relative;
+        }
+
+        .template-option:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .template-option.selected {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(37, 99, 235, 0.3) 100%);
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .template-option.selected::before {
+            content: '✓';
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #3B82F6;
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            min-height: calc(100vh - 200px);
+        }
+
+        .main-grid.centered {
+            grid-template-columns: 1fr;
+            place-items: center;
+        }
+
+        .upload-section-centered {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .settings-sticky {
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        .settings-sticky::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .settings-sticky::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.3);
+            border-radius: 4px;
+        }
+
+        .settings-sticky::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #3B82F6 0%, #2563EB 100%);
+            border-radius: 4px;
+        }
+
+        .settings-sticky::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #60A5FA 0%, #3B82F6 100%);
+        }
+
+        /* THIN GREY SLIDER - MATCHING DESIGN */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 2px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid #FFFFFF;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+        }
+
+        input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(148, 163, 184, 0.3);
+            border-radius: 2px;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid #FFFFFF;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        input[type="range"]::-moz-range-thumb:hover {
+            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(148, 163, 184, 0.3);
+            transition: all 0.3s ease;
+            background: rgba(30, 41, 59, 0.3);
+        }
+
+        .upload-area:hover {
+            border-color: #3B82F6;
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: rgba(71, 85, 105, 0.5);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        }
+
+        .toggle-dot {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active .toggle-dot {
+            transform: translateX(24px);
+        }
+
+        .badge {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .badge:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(37, 99, 235, 0.3) 100%);
+            transform: scale(1.05);
+        }
+
+        .badge.editing {
+            background: rgba(59, 130, 246, 0.4);
+        }
+
+        .badge input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            text-align: center;
+            width: 100%;
+            font-size: inherit;
+            font-weight: inherit;
+        }
+
+        .section-title {
+            font-weight: 600;
+            background: linear-gradient(135deg, #60A5FA 0%, #3B82F6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(148, 163, 184, 0.3);
+        }
+
+        /* Logo Watermark Style */
+        .logo-watermark {
+            display: inline-block;
+            position: relative;
+            transform: rotate(-45deg);
+            margin-top: 30px;
+        }
+
+        .logo-watermark::before,
+        .logo-watermark::after {
+            content: '';
+            position: absolute;
+            left: -100px;
+            right: -100px;
+            height: 4px;
+            background: linear-gradient(90deg, #3B82F6, #2563EB);
+            border-radius: 2px;
+        }
+
+        .logo-watermark::before {
+            top: -10px;
+        }
+
+        .logo-watermark::after {
+            bottom: -10px;
+        }
+
+        /* Shield Glow */
+        .shield-glow {
+            filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.8)) 
+                    drop-shadow(0 0 16px rgba(34, 197, 94, 0.5));
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.5); }
+        }
+
+        .glow-effect {
+            animation: glow 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <div class="max-w-full mx-auto px-6 py-8">
+        <!-- Header -->
+        <div class="flex items-start justify-between mb-8">
+            <!-- Logo Watermark Left -->
+            <div class="logo-watermark">
+                <h1 class="text-2xl font-extrabold bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent whitespace-nowrap">
+                    PALANG IC
+                </h1>
+            </div>
+
+            <!-- Center Content -->
+            <div class="text-center flex-1">
+                <h2 class="text-5xl font-black mb-3 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent" style="line-height: 1.2;">
+                    Palang IC
+                </h2>
+                <p class="text-slate-400 text-sm mb-2">Secure Your Documents with PALANG IC</p>
+                <p class="text-slate-500 text-xs mb-3 flex items-center justify-center gap-2">
+                    Made by Orang Melayu for the World 
+                    <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd"/>
+                    </svg>
+                </p>
+                <div class="flex items-start justify-center gap-3 text-xs text-slate-400 max-w-2xl mx-auto">
+                    <svg class="w-8 h-8 text-green-500 flex-shrink-0 shield-glow" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <div class="text-center">
+                        <p>All your data is processed locally in your browser and never leaves your device.</p>
+                        <p>We don't store, collect, or transmit any of your personal information.</p>
+                        <p>100% secure and private.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Spacer -->
+            <div class="w-32"></div>
+        </div>
+
+        <!-- Main Layout -->
+        <div id="mainContainer" class="main-grid centered">
+
+            <!-- LEFT SIDE: Upload/Preview -->
+            <div id="previewSection" class="space-y-4 upload-section-centered">
+
+                <!-- Front IC -->
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold section-title">Front IC</h2>
+                        <button id="deleteFront" class="hidden btn-danger text-white text-xs font-medium py-2 px-3 rounded-lg flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Upload Area -->
+                    <div id="frontUploadArea" class="upload-area rounded-xl p-10 text-center cursor-pointer">
+                        <input type="file" id="frontUpload" accept="image/*" class="hidden">
+                        <label for="frontUpload" class="cursor-pointer block">
+                            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+                            <p class="text-slate-300 text-sm font-medium mb-1">Upload Front IC</p>
+                            <p class="text-slate-500 text-xs">Click or drag and drop</p>
+                        </label>
+                    </div>
+
+                    <!-- Canvas Preview -->
+                    <div id="frontPreview" class="hidden mt-4">
+                        <div class="glass-card-light p-4 rounded-xl">
+                            <canvas id="frontCanvas" class="w-full rounded-xl"></canvas>
+                        </div>
+                        <button id="downloadFront" class="btn-primary mt-4 w-full text-white font-medium py-3 px-6 rounded-xl text-sm">
+                            Download Front IC
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Back IC -->
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold section-title">Back IC</h2>
+                        <button id="deleteBack" class="hidden btn-danger text-white text-xs font-medium py-2 px-3 rounded-lg flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Upload Area -->
+                    <div id="backUploadArea" class="upload-area rounded-xl p-10 text-center cursor-pointer">
+                        <input type="file" id="backUpload" accept="image/*" class="hidden">
+                        <label for="backUpload" class="cursor-pointer block">
+                            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+                            <p class="text-slate-300 text-sm font-medium mb-1">Upload Back IC</p>
+                            <p class="text-slate-500 text-xs">Click or drag and drop</p>
+                        </label>
+                    </div>
+
+                    <!-- Canvas Preview -->
+                    <div id="backPreview" class="hidden mt-4">
+                        <div class="glass-card-light p-4 rounded-xl">
+                            <canvas id="backCanvas" class="w-full rounded-xl"></canvas>
+                        </div>
+                        <button id="downloadBack" class="btn-primary mt-4 w-full text-white font-medium py-3 px-6 rounded-xl text-sm">
+                            Download Back IC
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT SIDE: Settings (hidden initially) -->
+            <div id="settingsPanel" class="hidden">
+                <div class="settings-sticky glass-card rounded-2xl p-6">
+                    <h2 class="text-lg font-semibold mb-5 section-title">Watermark Settings</h2>
+
+                    <!-- Watermark Templates -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-medium mb-3 text-slate-300">Quick Templates</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="template-option selected" data-template="FOR PRIVATE USE ONLY">
+                                FOR PRIVATE USE ONLY
+                            </div>
+                            <div class="template-option" data-template="FOR BANK USE ONLY">
+                                FOR BANK USE ONLY
+                            </div>
+                            <div class="template-option" data-template="FOR VERIFICATION ONLY">
+                                FOR VERIFICATION ONLY
+                            </div>
+                            <div class="template-option" data-template="FOR OFFICIAL USE ONLY">
+                                FOR OFFICIAL USE ONLY
+                            </div>
+                            <div class="template-option" data-template="FOR LOAN APPLICATION">
+                                FOR LOAN APPLICATION
+                            </div>
+                            <div class="template-option" data-template="SAMPLE DOCUMENT">
+                                SAMPLE DOCUMENT
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Watermark Text -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-medium mb-2 text-slate-300">Custom Text (Press Enter for 2nd line)</label>
+                        <textarea id="watermarkText" rows="2" placeholder="Enter watermark text..." class="w-full px-4 py-2.5 text-sm bg-slate-800/50 border border-slate-700/50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-slate-500 resize-none">FOR PRIVATE USE ONLY</textarea>
+                    </div>
+
+                    <!-- Color Selection -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-medium mb-2 text-slate-300">Color</label>
+                        <div class="flex gap-2 mb-3">
+                            <div class="color-preset active bg-black" data-color="#000000" title="Black">
+                                <span class="text-white text-[10px] font-semibold">A</span>
+                            </div>
+                            <div class="color-preset bg-white" data-color="#FFFFFF" title="White">
+                                <span class="text-black text-[10px] font-semibold">A</span>
+                            </div>
+                            <div class="color-preset bg-red-600" data-color="#DC2626" title="Red">
+                                <span class="text-white text-[10px] font-semibold">A</span>
+                            </div>
+                            <div class="color-preset bg-blue-600" data-color="#2563EB" title="Blue">
+                                <span class="text-white text-[10px] font-semibold">A</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 bg-slate-800/50 px-4 py-2.5 rounded-xl border border-slate-700/50">
+                            <label for="customColorPicker" class="text-xs text-slate-400 flex-shrink-0">Custom</label>
+                            <input type="color" id="customColorPicker" value="#000000" class="h-8 w-14 bg-transparent border-2 border-slate-600 rounded-lg cursor-pointer">
+                            <span id="selectedColorHex" class="font-mono text-xs text-slate-300 ml-auto badge px-2 py-1 rounded-md">#000000</span>
+                        </div>
+                    </div>
+
+                    <!-- Text Background -->
+                    <div class="mb-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-xs font-medium text-slate-300">Text Background</label>
+                            <div class="toggle-switch active" id="textBackgroundToggle">
+                                <div class="toggle-dot"></div>
+                            </div>
+                        </div>
+                        <div id="textBackgroundControl" class="space-y-3">
+                            <div class="flex items-center gap-3 bg-slate-800/50 px-4 py-2.5 rounded-xl border border-slate-700/50">
+                                <label for="bgColorPicker" class="text-xs text-slate-400 flex-shrink-0">BG Color</label>
+                                <input type="color" id="bgColorPicker" value="#FFFFFF" class="h-8 w-14 bg-transparent border-2 border-slate-600 rounded-lg cursor-pointer">
+                                <span id="selectedBgColorHex" class="font-mono text-xs text-slate-300 ml-auto badge px-2 py-1 rounded-md">#FFFFFF</span>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-xs font-medium text-slate-400">BG Opacity</label>
+                                    <span id="bgOpacityValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">0.3</span>
+                                </div>
+                                <input type="range" id="bgOpacity" min="0.1" max="1" step="0.1" value="0.3" class="w-full">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Size -->
+                    <div class="mb-5">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-medium text-slate-300">Size</label>
+                            <span id="sizeValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">48px</span>
+                        </div>
+                        <input type="range" id="watermarkSize" min="20" max="120" value="48" class="w-full">
+                    </div>
+
+                    <!-- Rotation -->
+                    <div class="mb-5">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-medium text-slate-300">Rotation</label>
+                            <span id="rotationValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">-45°</span>
+                        </div>
+                        <input type="range" id="rotation" min="-180" max="180" value="-45" class="w-full">
+                    </div>
+
+                    <!-- Opacity -->
+                    <div class="mb-5">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-medium text-slate-300">Opacity</label>
+                            <span id="opacityValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">1.0</span>
+                        </div>
+                        <input type="range" id="opacity" min="0.1" max="1" step="0.1" value="1" class="w-full">
+                    </div>
+
+                    <!-- Line Thickness -->
+                    <div class="mb-5">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-medium text-slate-300">Line Thickness</label>
+                            <span id="lineThicknessValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">7px</span>
+                        </div>
+                        <input type="range" id="lineThickness" min="1" max="15" value="7" class="w-full">
+                    </div>
+
+                    <div class="divider my-5"></div>
+
+                    <!-- White Background -->
+                    <div class="mb-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-xs font-medium text-slate-300">White Background</label>
+                            <div class="toggle-switch active" id="whiteBackgroundToggle">
+                                <div class="toggle-dot"></div>
+                            </div>
+                        </div>
+                        <div id="paddingControl">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs font-medium text-slate-400">Padding</label>
+                                <span id="paddingValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">180px</span>
+                            </div>
+                            <input type="range" id="paddingSize" min="10" max="300" value="180" class="w-full">
+                        </div>
+                    </div>
+
+                    <!-- Rounded Corners -->
+                    <div class="mb-5">
+                        <div class="flex items-center justify-between mb-3">
+                            <label class="text-xs font-medium text-slate-300">Rounded Corners</label>
+                            <div class="toggle-switch active" id="roundedCornersToggle">
+                                <div class="toggle-dot"></div>
+                            </div>
+                        </div>
+                        <div id="cornerRadiusControl">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-xs font-medium text-slate-400">Corner Radius</label>
+                                <span id="cornerRadiusValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">50px</span>
+                            </div>
+                            <input type="range" id="cornerRadius" min="5" max="100" value="50" class="w-full">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 space-y-2">
+            <p class="text-slate-500 text-xs">🔒 Privacy First: All images are processed locally in your browser</p>
+            <div class="flex items-center justify-center gap-2 text-xs text-slate-600">
+                <span>Need help?</span>
+                <a href="mailto:afuitdev@gmail.com" class="text-blue-400 hover:text-blue-300 transition-colors">afuitdev@gmail.com</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var frontImage = null;
+        var backImage = null;
+        var frontWatermarkPos = { x: 100, y: 100 };
+        var backWatermarkPos = { x: 100, y: 100 };
+        var isDragging = false;
+        var currentSide = null;
+        var dragOffset = { x: 0, y: 0 };
+        var currentColor = "#000000";
+        var whiteBackgroundEnabled = true;
+        var roundedCornersEnabled = true;
+        var textBackgroundEnabled = true;
+        var textBgColor = "#FFFFFF";
+        var textBgOpacity = 0.3;
+
+        var watermarkTextInput = document.getElementById("watermarkText");
+        var watermarkSizeInput = document.getElementById("watermarkSize");
+        var rotationInput = document.getElementById("rotation");
+        var opacityInput = document.getElementById("opacity");
+        var lineThicknessInput = document.getElementById("lineThickness");
+        var customColorPicker = document.getElementById("customColorPicker");
+        var selectedColorHex = document.getElementById("selectedColorHex");
+        var whiteBackgroundToggle = document.getElementById("whiteBackgroundToggle");
+        var paddingControl = document.getElementById("paddingControl");
+        var paddingSizeInput = document.getElementById("paddingSize");
+        var roundedCornersToggle = document.getElementById("roundedCornersToggle");
+        var cornerRadiusControl = document.getElementById("cornerRadiusControl");
+        var cornerRadiusInput = document.getElementById("cornerRadius");
+        var textBackgroundToggle = document.getElementById("textBackgroundToggle");
+        var textBackgroundControl = document.getElementById("textBackgroundControl");
+        var bgColorPicker = document.getElementById("bgColorPicker");
+        var selectedBgColorHex = document.getElementById("selectedBgColorHex");
+        var bgOpacityInput = document.getElementById("bgOpacity");
+        var settingsPanel = document.getElementById("settingsPanel");
+        var previewSection = document.getElementById("previewSection");
+        var mainContainer = document.getElementById("mainContainer");
+
+        var sizeValue = document.getElementById("sizeValue");
+        var rotationValue = document.getElementById("rotationValue");
+        var opacityValue = document.getElementById("opacityValue");
+        var lineThicknessValue = document.getElementById("lineThicknessValue");
+        var paddingValue = document.getElementById("paddingValue");
+        var cornerRadiusValue = document.getElementById("cornerRadiusValue");
+        var bgOpacityValue = document.getElementById("bgOpacityValue");
+
+        // Template Selection
+        var templateOptions = document.querySelectorAll(".template-option");
+        for (var i = 0; i < templateOptions.length; i++) {
+            templateOptions[i].addEventListener("click", function() {
+                for (var j = 0; j < templateOptions.length; j++) {
+                    templateOptions[j].classList.remove("selected");
+                }
+                this.classList.add("selected");
+                var templateText = this.getAttribute("data-template");
+                watermarkTextInput.value = templateText;
+                if (frontImage) renderCanvas("front", frontImage);
+                if (backImage) renderCanvas("back", backImage);
+            });
+        }
+
+        function showSettingsPanel() {
+            settingsPanel.classList.remove("hidden");
+            mainContainer.classList.remove("centered");
+            previewSection.classList.remove("upload-section-centered");
+        }
+
+        function hideSettingsPanel() {
+            settingsPanel.classList.add("hidden");
+            mainContainer.classList.add("centered");
+            previewSection.classList.add("upload-section-centered");
+        }
+
+        document.getElementById("deleteFront").addEventListener("click", function() {
+            frontImage = null;
+            document.getElementById("frontPreview").classList.add("hidden");
+            document.getElementById("frontUploadArea").classList.remove("hidden");
+            document.getElementById("deleteFront").classList.add("hidden");
+            document.getElementById("frontUpload").value = "";
+
+            if (!frontImage && !backImage) {
+                hideSettingsPanel();
+            }
+        });
+
+        document.getElementById("deleteBack").addEventListener("click", function() {
+            backImage = null;
+            document.getElementById("backPreview").classList.add("hidden");
+            document.getElementById("backUploadArea").classList.remove("hidden");
+            document.getElementById("deleteBack").classList.add("hidden");
+            document.getElementById("backUpload").value = "";
+
+            if (!frontImage && !backImage) {
+                hideSettingsPanel();
+            }
+        });
+
+        document.getElementById("frontUpload").addEventListener("change", function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var reader = new FileReader();
+            reader.onload = function(readerEvent) {
+                var img = new Image();
+                img.onload = function() {
+                    frontImage = img;
+                    frontWatermarkPos = { x: 100, y: 100 };
+                    showSettingsPanel();
+                    renderCanvas("front", img);
+                    document.getElementById("frontPreview").classList.remove("hidden");
+                    document.getElementById("frontUploadArea").classList.add("hidden");
+                    document.getElementById("deleteFront").classList.remove("hidden");
+                };
+                img.src = readerEvent.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById("backUpload").addEventListener("change", function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            var reader = new FileReader();
+            reader.onload = function(readerEvent) {
+                var img = new Image();
+                img.onload = function() {
+                    backImage = img;
+                    backWatermarkPos = { x: 100, y: 100 };
+                    showSettingsPanel();
+                    renderCanvas("back", img);
+                    document.getElementById("backPreview").classList.remove("hidden");
+                    document.getElementById("backUploadArea").classList.add("hidden");
+                    document.getElementById("deleteBack").classList.remove("hidden");
+                };
+                img.src = readerEvent.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        var colorPresets = document.querySelectorAll(".color-preset");
+        for (var i = 0; i < colorPresets.length; i++) {
+            colorPresets[i].addEventListener("click", function() {
+                for (var j = 0; j < colorPresets.length; j++) {
+                    colorPresets[j].classList.remove("active");
+                }
+                this.classList.add("active");
+                currentColor = this.getAttribute("data-color");
+                customColorPicker.value = currentColor;
+                selectedColorHex.textContent = currentColor.toUpperCase();
+                if (frontImage) renderCanvas("front", frontImage);
+                if (backImage) renderCanvas("back", backImage);
+            });
+        }
+
+        customColorPicker.addEventListener("input", function(e) {
+            currentColor = e.target.value;
+            selectedColorHex.textContent = currentColor.toUpperCase();
+            for (var i = 0; i < colorPresets.length; i++) {
+                colorPresets[i].classList.remove("active");
+            }
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        textBackgroundToggle.addEventListener("click", function() {
+            textBackgroundEnabled = !textBackgroundEnabled;
+            if (textBackgroundEnabled) {
+                this.classList.add("active");
+                textBackgroundControl.classList.remove("hidden");
+            } else {
+                this.classList.remove("active");
+                textBackgroundControl.classList.add("hidden");
+            }
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        bgColorPicker.addEventListener("input", function(e) {
+            textBgColor = e.target.value;
+            selectedBgColorHex.textContent = textBgColor.toUpperCase();
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        bgOpacityInput.addEventListener("input", function(e) {
+            textBgOpacity = parseFloat(e.target.value);
+            bgOpacityValue.textContent = textBgOpacity.toFixed(1);
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        function renderCanvas(side, img) {
+            var canvasId = side === "front" ? "frontCanvas" : "backCanvas";
+            var canvas = document.getElementById(canvasId);
+            var ctx = canvas.getContext("2d");
+
+            var padding = whiteBackgroundEnabled ? parseInt(paddingSizeInput.value) : 0;
+            var cornerRadius = roundedCornersEnabled ? parseInt(cornerRadiusInput.value) : 0;
+
+            if (whiteBackgroundEnabled) {
+                canvas.width = img.width + (padding * 2);
+                canvas.height = img.height + (padding * 2);
+
+                ctx.fillStyle = "#FFFFFF";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.save();
+                if (roundedCornersEnabled) {
+                    roundRect(ctx, padding, padding, img.width, img.height, cornerRadius);
+                    ctx.clip();
+                }
+                ctx.drawImage(img, padding, padding);
+                ctx.restore();
+            } else {
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                ctx.save();
+                if (roundedCornersEnabled) {
+                    roundRect(ctx, 0, 0, img.width, img.height, cornerRadius);
+                    ctx.clip();
+                }
+                ctx.drawImage(img, 0, 0);
+                ctx.restore();
+            }
+
+            var pos = side === "front" ? frontWatermarkPos : backWatermarkPos;
+            var adjustedX = whiteBackgroundEnabled ? pos.x + padding : pos.x;
+            var adjustedY = whiteBackgroundEnabled ? pos.y + padding : pos.y;
+            drawWatermark(ctx, adjustedX, adjustedY);
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        function drawWatermark(ctx, x, y) {
+            var text = watermarkTextInput.value;
+            var lines = text.split("\n");
+            var fontSize = parseInt(watermarkSizeInput.value);
+            var rotation = parseInt(rotationInput.value) * Math.PI / 180;
+            var opacity = parseFloat(opacityInput.value);
+            var lineThickness = parseInt(lineThicknessInput.value);
+            var color = currentColor;
+
+            var r = parseInt(color.substr(1, 2), 16);
+            var g = parseInt(color.substr(3, 2), 16);
+            var b = parseInt(color.substr(5, 2), 16);
+
+            ctx.save();
+            ctx.font = "bold " + fontSize + "px Arial";
+
+            var maxWidth = 0;
+            for (var i = 0; i < lines.length; i++) {
+                var width = ctx.measureText(lines[i]).width;
+                if (width > maxWidth) maxWidth = width;
+            }
+
+            var lineLength = maxWidth + 40;
+            var lineHeight = fontSize * 1.3;
+            var totalHeight = (lines.length * lineHeight);
+
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+
+            if (textBackgroundEnabled) {
+                var bgR = parseInt(textBgColor.substr(1, 2), 16);
+                var bgG = parseInt(textBgColor.substr(3, 2), 16);
+                var bgB = parseInt(textBgColor.substr(5, 2), 16);
+
+                var bgPadding = 10;
+                var topLineOffset = -totalHeight / 2 - 15;
+                var bottomLineOffset = totalHeight / 2 + 15;
+
+                ctx.fillStyle = "rgba(" + bgR + "," + bgG + "," + bgB + "," + textBgOpacity + ")";
+                ctx.fillRect(
+                    -lineLength / 2 - bgPadding,
+                    topLineOffset,
+                    lineLength + (bgPadding * 2),
+                    bottomLineOffset - topLineOffset
+                );
+            }
+
+            ctx.fillStyle = "rgba(" + r + "," + g + "," + b + "," + opacity + ")";
+            ctx.strokeStyle = "rgba(" + r + "," + g + "," + b + "," + opacity + ")";
+            ctx.lineWidth = lineThickness;
+            ctx.lineCap = "round";
+
+            var topLineOffset = -totalHeight / 2 - 15;
+            var bottomLineOffset = totalHeight / 2 + 15;
+
+            ctx.beginPath();
+            ctx.moveTo(-lineLength / 2, topLineOffset);
+            ctx.lineTo(lineLength / 2, topLineOffset);
+            ctx.stroke();
+
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            var startY = -(lines.length - 1) * lineHeight / 2;
+            for (var i = 0; i < lines.length; i++) {
+                ctx.fillText(lines[i], 0, startY + (i * lineHeight));
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(-lineLength / 2, bottomLineOffset);
+            ctx.lineTo(lineLength / 2, bottomLineOffset);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        watermarkTextInput.addEventListener("input", function() {
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        watermarkSizeInput.addEventListener("input", function(e) {
+            sizeValue.textContent = e.target.value + "px";
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        rotationInput.addEventListener("input", function(e) {
+            rotationValue.textContent = e.target.value + "°";
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        opacityInput.addEventListener("input", function(e) {
+            opacityValue.textContent = parseFloat(e.target.value).toFixed(1);
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        lineThicknessInput.addEventListener("input", function(e) {
+            lineThicknessValue.textContent = e.target.value + "px";
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        paddingSizeInput.addEventListener("input", function(e) {
+            paddingValue.textContent = e.target.value + "px";
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        cornerRadiusInput.addEventListener("input", function(e) {
+            cornerRadiusValue.textContent = e.target.value + "px";
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        whiteBackgroundToggle.addEventListener("click", function() {
+            whiteBackgroundEnabled = !whiteBackgroundEnabled;
+            this.classList.toggle("active", whiteBackgroundEnabled);
+            paddingControl.classList.toggle("hidden", !whiteBackgroundEnabled);
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        roundedCornersToggle.addEventListener("click", function() {
+            roundedCornersEnabled = !roundedCornersEnabled;
+            this.classList.toggle("active", roundedCornersEnabled);
+            cornerRadiusControl.classList.toggle("hidden", !roundedCornersEnabled);
+            if (frontImage) renderCanvas("front", frontImage);
+            if (backImage) renderCanvas("back", backImage);
+        });
+
+        document.getElementById("downloadFront").addEventListener("click", function() {
+            var canvas = document.getElementById("frontCanvas");
+            var link = document.createElement("a");
+            link.download = "ic-front-crossed.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+
+        document.getElementById("downloadBack").addEventListener("click", function() {
+            var canvas = document.getElementById("backCanvas");
+            var link = document.createElement("a");
+            link.download = "ic-back-crossed.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        });
+    </script>
+</body>
+</html>
