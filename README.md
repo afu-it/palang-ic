@@ -1,4 +1,4 @@
-# 🛡️ Palang IC - MyKad Watermark Tool
+# Palang IC - MyKad Watermark Tool
 
 ![Palang IC Banner](https://img.shields.io/badge/Privacy-First-green) ![Made in Malaysia](https://img.shields.io/badge/Made%20in-Malaysia-red) ![License](https://img.shields.io/badge/License-MIT-blue)
 
@@ -6,7 +6,7 @@
 
 🔒 **100% Client-Side Processing** - All images are processed locally in your browser. No uploads, no servers, no tracking.
 
-[🚀 Live Demo](https://yourusername.github.io/palang-ic/) | [📖 Documentation](#documentation) | [🐛 Report Issue](https://github.com/yourusername/palang-ic/issues)
+[🚀 Live Demo](https://afu-it.github.io/palang-ic/) | [📖 Documentation](#documentation) | [🐛 Report Issue](https://github.com/afu-it/palang-ic/issues)
 
 ---
 
@@ -53,12 +53,11 @@
 ## 🚀 Quick Start
 
 ### Option 1: Use Online (Recommended)
-Visit the live demo: [https://yourusername.github.io/palang-ic/](https://yourusername.github.io/palang-ic/)
+Visit the live demo: [https://afu-it.github.io/palang-ic/](https://afu-it.github.io/palang-ic/)
 
 ### Option 2: Download & Use Locally
-1. Download `palang-ic.html`
+1. Download `index.html`
 2. Open it in any modern web browser
-3. Start adding watermarks!
 
 No installation or setup required! 🎉
 
@@ -187,7 +186,7 @@ We welcome contributions from the community!
 ### Development Setup
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/palang-ic.git
+git clone https://github.com/afu-it/palang-ic.git
 
 # Open in browser
 # Simply open palang-ic.html in your browser
@@ -206,9 +205,9 @@ git clone https://github.com/yourusername/palang-ic.git
 
 Found a bug or have a feature idea?
 
-- **Bug Reports**: [Open an issue](https://github.com/yourusername/palang-ic/issues/new?template=bug_report.md)
-- **Feature Requests**: [Open an issue](https://github.com/yourusername/palang-ic/issues/new?template=feature_request.md)
-- **Questions**: [Discussions](https://github.com/yourusername/palang-ic/discussions)
+- **Bug Reports**: [Open an issue](https://github.com/afu-it/palang-ic/issues/new?template=bug_report.md)
+- **Feature Requests**: [Open an issue](https://github.com/afu-it/palang-ic/issues/new?template=feature_request.md)
+- **Questions**: [Discussions](https://github.com/afu-it/palang-ic/discussions)
 
 ---
 
@@ -246,15 +245,15 @@ SOFTWARE.
 
 If you find this project useful, please consider giving it a ⭐ on GitHub!
 
-[![Star History Chart](https://api.star-history.com/svg?repos=yourusername/palang-ic&type=Date)](https://star-history.com/#yourusername/palang-ic&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=afu-it/palang-ic&type=Date)](https://star-history.com/#afu-it/palang-ic&Date)
 
 ---
 
 ## 📞 Contact & Support
 
 - **Email**: [afuitdev@gmail.com](mailto:afuitdev@gmail.com)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/palang-ic/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/palang-ic/discussions)
+- **Issues**: [GitHub Issues](https://github.com/afu-it/palang-ic/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/afu-it/palang-ic/discussions)
 
 ---
 
