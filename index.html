@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Palang IC - MyKad Watermark Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -239,6 +240,18 @@
             box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
         }
 
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(79, 70, 229, 0.3) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.5) 0%, rgba(79, 70, 229, 0.5) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+        }
+
         .btn-danger {
             background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
             transition: all 0.3s ease;
@@ -372,6 +385,43 @@
         .glow-effect {
             animation: glow 3s ease-in-out infinite;
         }
+
+        /* PDF Export Container */
+        #pdfContainer {
+            display: none;
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            background: white;
+            padding: 40px;
+            width: 210mm;
+            height: 297mm;
+            box-sizing: border-box;
+        }
+
+        .pdf-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100%;
+            gap: 60px;
+        }
+
+        .pdf-image {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .download-section {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .download-btn {
+            flex: 1;
+        }
     </style>
 </head>
 <body class="text-white">
@@ -399,7 +449,7 @@
                 </p>
                 <div class="flex items-start justify-center gap-3 text-xs text-slate-400 max-w-2xl mx-auto">
                     <svg class="w-8 h-8 text-green-500 flex-shrink-0 shield-glow" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0110 1.944 11.954 11.954 0 0117.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
                     <div class="text-center">
                         <p>All your data is processed locally in your browser and never leaves your device.</p>
@@ -451,6 +501,24 @@
                         </div>
                         <button id="downloadFront" class="btn-primary mt-4 w-full text-white font-medium py-3 px-6 rounded-xl text-sm">
                             Download Front IC
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BULK DOWNLOAD BUTTONS -->
+                <div id="bulkDownloadSection" class="hidden">
+                    <div class="download-section">
+                        <button id="downloadBoth" class="download-btn btn-secondary text-white font-medium py-3 px-6 rounded-xl text-sm flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            Download Both (ZIP)
+                        </button>
+                        <button id="downloadPDF" class="download-btn btn-secondary text-white font-medium py-3 px-6 rounded-xl text-sm flex items-center justify-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            Download as PDF
                         </button>
                     </div>
                 </div>
@@ -653,6 +721,14 @@
 
         </div>
 
+        <!-- PDF Container (Hidden) -->
+        <div id="pdfContainer">
+            <div class="pdf-content">
+                <img id="pdfFrontImg" class="pdf-image" alt="Front IC">
+                <img id="pdfBackImg" class="pdf-image" alt="Back IC">
+            </div>
+        </div>
+
         <!-- Footer -->
         <div class="text-center mt-8 space-y-2">
             <p class="text-slate-500 text-xs">🔒 Privacy First: All images are processed locally in your browser</p>
@@ -662,6 +738,8 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script>
         var frontImage = null;
@@ -708,6 +786,8 @@
         var cornerRadiusValue = document.getElementById("cornerRadiusValue");
         var bgOpacityValue = document.getElementById("bgOpacityValue");
 
+        var bulkDownloadSection = document.getElementById("bulkDownloadSection");
+
         // Template Selection
         var templateOptions = document.querySelectorAll(".template-option");
         for (var i = 0; i < templateOptions.length; i++) {
@@ -735,12 +815,21 @@
             previewSection.classList.add("upload-section-centered");
         }
 
+        function updateBulkDownloadSection() {
+            if (frontImage && backImage) {
+                bulkDownloadSection.classList.remove("hidden");
+            } else {
+                bulkDownloadSection.classList.add("hidden");
+            }
+        }
+
         document.getElementById("deleteFront").addEventListener("click", function() {
             frontImage = null;
             document.getElementById("frontPreview").classList.add("hidden");
             document.getElementById("frontUploadArea").classList.remove("hidden");
             document.getElementById("deleteFront").classList.add("hidden");
             document.getElementById("frontUpload").value = "";
+            updateBulkDownloadSection();
 
             if (!frontImage && !backImage) {
                 hideSettingsPanel();
@@ -753,6 +842,7 @@
             document.getElementById("backUploadArea").classList.remove("hidden");
             document.getElementById("deleteBack").classList.add("hidden");
             document.getElementById("backUpload").value = "";
+            updateBulkDownloadSection();
 
             if (!frontImage && !backImage) {
                 hideSettingsPanel();
@@ -774,6 +864,7 @@
                     document.getElementById("frontPreview").classList.remove("hidden");
                     document.getElementById("frontUploadArea").classList.add("hidden");
                     document.getElementById("deleteFront").classList.remove("hidden");
+                    updateBulkDownloadSection();
                 };
                 img.src = readerEvent.target.result;
             };
@@ -795,6 +886,7 @@
                     document.getElementById("backPreview").classList.remove("hidden");
                     document.getElementById("backUploadArea").classList.add("hidden");
                     document.getElementById("deleteBack").classList.remove("hidden");
+                    updateBulkDownloadSection();
                 };
                 img.src = readerEvent.target.result;
             };
@@ -1041,6 +1133,7 @@
             if (backImage) renderCanvas("back", backImage);
         });
 
+        // Download Individual
         document.getElementById("downloadFront").addEventListener("click", function() {
             var canvas = document.getElementById("frontCanvas");
             var link = document.createElement("a");
@@ -1055,6 +1148,43 @@
             link.download = "ic-back-crossed.png";
             link.href = canvas.toDataURL("image/png");
             link.click();
+        });
+
+        // Download Both as ZIP
+        document.getElementById("downloadBoth").addEventListener("click", function() {
+            var frontCanvas = document.getElementById("frontCanvas");
+            var backCanvas = document.getElementById("backCanvas");
+
+            var zip = new JSZip();
+            zip.file("ic-front.png", frontCanvas.toDataURL("image/png").split(',')[1], { base64: true });
+            zip.file("ic-back.png", backCanvas.toDataURL("image/png").split(',')[1], { base64: true });
+
+            zip.generateAsync({ type: "blob" }).then(function(content) {
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(content);
+                link.download = "ic-watermarked.zip";
+                link.click();
+            });
+        });
+
+        // Download as PDF (A4)
+        document.getElementById("downloadPDF").addEventListener("click", function() {
+            var frontCanvas = document.getElementById("frontCanvas");
+            var backCanvas = document.getElementById("backCanvas");
+
+            document.getElementById("pdfFrontImg").src = frontCanvas.toDataURL("image/png");
+            document.getElementById("pdfBackImg").src = backCanvas.toDataURL("image/png");
+
+            var element = document.getElementById("pdfContainer");
+            var opt = {
+                margin: 10,
+                filename: "ic-watermarked.pdf",
+                image: { type: "png", quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+            };
+
+            html2pdf().set(opt).from(element).save();
         });
     </script>
 </body>
