@@ -272,6 +272,12 @@
             background: rgba(59, 130, 246, 0.05);
         }
 
+        .upload-area.drag-over {
+            border-color: #3B82F6;
+            background: rgba(59, 130, 246, 0.15);
+            transform: scale(1.02);
+        }
+
         .toggle-switch {
             position: relative;
             width: 48px;
@@ -442,7 +448,7 @@
 
                     <div id="frontUploadArea" class="upload-area rounded-xl p-10 text-center cursor-pointer">
                         <input type="file" id="frontUpload" accept="image/*" class="hidden">
-                        <label for="frontUpload" class="cursor-pointer block">
+                        <label for="frontUpload" class="cursor-pointer block pointer-events-none">
                             <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
@@ -502,7 +508,7 @@
 
                     <div id="backUploadArea" class="upload-area rounded-xl p-10 text-center cursor-pointer">
                         <input type="file" id="backUpload" accept="image/*" class="hidden">
-                        <label for="backUpload" class="cursor-pointer block">
+                        <label for="backUpload" class="cursor-pointer block pointer-events-none">
                             <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
                                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
@@ -733,6 +739,113 @@
         var frontCanvas = document.getElementById("frontCanvas");
         var backCanvas = document.getElementById("backCanvas");
 
+        // Function to process uploaded file
+        function processImageFile(file, side) {
+            if (!file || !file.type.match('image.*')) {
+                return;
+            }
+
+            var reader = new FileReader();
+            reader.onload = function(readerEvent) {
+                var img = new Image();
+                img.onload = function() {
+                    if (side === "front") {
+                        frontImage = img;
+                        frontWatermarkPos = { x: 100, y: 100 };
+                        showSettingsPanel();
+                        renderCanvas("front", img);
+                        document.getElementById("frontPreview").classList.remove("hidden");
+                        document.getElementById("frontUploadArea").classList.add("hidden");
+                        document.getElementById("deleteFront").classList.remove("hidden");
+                    } else {
+                        backImage = img;
+                        backWatermarkPos = { x: 100, y: 100 };
+                        showSettingsPanel();
+                        renderCanvas("back", img);
+                        document.getElementById("backPreview").classList.remove("hidden");
+                        document.getElementById("backUploadArea").classList.add("hidden");
+                        document.getElementById("deleteBack").classList.remove("hidden");
+                    }
+                    updateBulkDownloadSection();
+                };
+                img.src = readerEvent.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // DRAG AND DROP FOR FRONT IC
+        var frontUploadArea = document.getElementById("frontUploadArea");
+
+        frontUploadArea.addEventListener("dragover", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.add("drag-over");
+        });
+
+        frontUploadArea.addEventListener("dragleave", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove("drag-over");
+        });
+
+        frontUploadArea.addEventListener("drop", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove("drag-over");
+
+            var files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processImageFile(files[0], "front");
+            }
+        });
+
+        frontUploadArea.addEventListener("click", function() {
+            document.getElementById("frontUpload").click();
+        });
+
+        // DRAG AND DROP FOR BACK IC
+        var backUploadArea = document.getElementById("backUploadArea");
+
+        backUploadArea.addEventListener("dragover", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.add("drag-over");
+        });
+
+        backUploadArea.addEventListener("dragleave", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove("drag-over");
+        });
+
+        backUploadArea.addEventListener("drop", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove("drag-over");
+
+            var files = e.dataTransfer.files;
+            if (files.length > 0) {
+                processImageFile(files[0], "back");
+            }
+        });
+
+        backUploadArea.addEventListener("click", function() {
+            document.getElementById("backUpload").click();
+        });
+
+        // FILE INPUT CHANGE HANDLERS
+        document.getElementById("frontUpload").addEventListener("change", function(e) {
+            if (e.target.files.length > 0) {
+                processImageFile(e.target.files[0], "front");
+            }
+        });
+
+        document.getElementById("backUpload").addEventListener("change", function(e) {
+            if (e.target.files.length > 0) {
+                processImageFile(e.target.files[0], "back");
+            }
+        });
+
         // Function to get canvas coordinates accounting for scaling
         function getCanvasCoordinates(canvas, clientX, clientY) {
             var rect = canvas.getBoundingClientRect();
@@ -747,7 +860,7 @@
         // Function to check if mouse is near watermark (accounting for canvas scaling)
         function isMouseNearWatermark(canvasX, canvasY, wmX, wmY) {
             var distance = Math.sqrt(Math.pow(canvasX - wmX, 2) + Math.pow(canvasY - wmY, 2));
-            return distance < 150; // Hit area in canvas pixels
+            return distance < 150;
         }
 
         // DRAGGING FUNCTIONALITY
@@ -888,48 +1001,6 @@
             document.getElementById("backUpload").value = "";
             updateBulkDownloadSection();
             if (!frontImage && !backImage) hideSettingsPanel();
-        });
-
-        document.getElementById("frontUpload").addEventListener("change", function(e) {
-            var file = e.target.files[0];
-            if (!file) return;
-            var reader = new FileReader();
-            reader.onload = function(readerEvent) {
-                var img = new Image();
-                img.onload = function() {
-                    frontImage = img;
-                    frontWatermarkPos = { x: 100, y: 100 };
-                    showSettingsPanel();
-                    renderCanvas("front", img);
-                    document.getElementById("frontPreview").classList.remove("hidden");
-                    document.getElementById("frontUploadArea").classList.add("hidden");
-                    document.getElementById("deleteFront").classList.remove("hidden");
-                    updateBulkDownloadSection();
-                };
-                img.src = readerEvent.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
-
-        document.getElementById("backUpload").addEventListener("change", function(e) {
-            var file = e.target.files[0];
-            if (!file) return;
-            var reader = new FileReader();
-            reader.onload = function(readerEvent) {
-                var img = new Image();
-                img.onload = function() {
-                    backImage = img;
-                    backWatermarkPos = { x: 100, y: 100 };
-                    showSettingsPanel();
-                    renderCanvas("back", img);
-                    document.getElementById("backPreview").classList.remove("hidden");
-                    document.getElementById("backUploadArea").classList.add("hidden");
-                    document.getElementById("deleteBack").classList.remove("hidden");
-                    updateBulkDownloadSection();
-                };
-                img.src = readerEvent.target.result;
-            };
-            reader.readAsDataURL(file);
         });
 
         var colorPresets = document.querySelectorAll(".color-preset");
