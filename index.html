@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Palang IC - MyKad Watermark Tool</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -92,23 +92,7 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
-        .template-option.selected::before {
-            content: '✓';
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #3B82F6;
-            color: white;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-center;
-            font-size: 10px;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
+        /* Blue checkmark circle removed - no ::before pseudo-element */
 
         .main-grid {
             display: grid;
@@ -349,11 +333,26 @@
             background: rgba(148, 163, 184, 0.3);
         }
 
+        /* Logo watermark as background element - positioned lower */
         .logo-watermark {
-            display: inline-block;
-            position: relative;
+            position: absolute;
+            top: 40px;
+            left: -10px;
             transform: rotate(-45deg);
-            margin-top: 30px;
+            z-index: 0;
+            pointer-events: none;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        .logo-watermark h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #60A5FA, #3B82F6, #2563EB);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            white-space: nowrap;
         }
 
         .logo-watermark::before,
@@ -375,6 +374,25 @@
             bottom: -10px;
         }
 
+        /* Header container with relative positioning */
+        .header-container {
+            position: relative;
+            width: 100%;
+            transition: filter 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* Scroll blur effect */
+        .header-container.scrolled {
+            filter: blur(8px);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .header-content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
         .shield-glow {
             filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.8)) 
                     drop-shadow(0 0 16px rgba(34, 197, 94, 0.5));
@@ -388,69 +406,218 @@
         .glow-effect {
             animation: glow 3s ease-in-out infinite;
         }
+
+        /* MOBILE RESPONSIVE STYLES */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .main-grid.centered {
+                grid-template-columns: 1fr;
+            }
+
+            .upload-section-centered {
+                max-width: 100%;
+            }
+
+            .settings-sticky {
+                position: relative;
+                top: 0;
+                max-height: none;
+            }
+
+            /* Smaller logo on mobile and positioned lower */
+            .logo-watermark {
+                top: 15px;
+                left: -10px;
+            }
+
+            .logo-watermark h1 {
+                font-size: 1rem !important;
+            }
+
+            .logo-watermark::before,
+            .logo-watermark::after {
+                left: -50px;
+                right: -50px;
+                height: 2px;
+            }
+
+            .logo-watermark::before {
+                top: -6px;
+            }
+
+            .logo-watermark::after {
+                bottom: -6px;
+            }
+
+            .header-content-wrapper h2 {
+                font-size: 2rem !important;
+            }
+
+            .header-content-wrapper p {
+                font-size: 0.75rem;
+            }
+
+            /* Privacy info mobile layout */
+            .privacy-info {
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 0.75rem !important;
+            }
+
+            .privacy-info-text {
+                text-align: center !important;
+            }
+
+            /* Smaller shield on mobile */
+            .shield-glow {
+                width: 1.75rem !important;
+                height: 1.75rem !important;
+            }
+
+            .glass-card {
+                padding: 1rem !important;
+            }
+
+            .upload-area {
+                padding: 2rem 1rem !important;
+            }
+
+            .upload-icon {
+                width: 3rem !important;
+                height: 3rem !important;
+            }
+
+            .template-option {
+                font-size: 9px;
+                padding: 6px 8px;
+            }
+
+            .color-preset {
+                width: 32px;
+                height: 32px;
+            }
+
+            .btn-primary, .btn-secondary, .btn-danger {
+                padding: 0.75rem 1rem !important;
+                font-size: 0.875rem;
+            }
+
+            input[type="range"] {
+                height: 6px;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                width: 20px;
+                height: 20px;
+            }
+
+            .badge {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+
+            canvas {
+                touch-action: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content-wrapper h2 {
+                font-size: 1.5rem !important;
+            }
+
+            .template-option {
+                font-size: 8px;
+                padding: 4px 6px;
+            }
+
+            .glass-card {
+                padding: 0.75rem !important;
+            }
+
+            .section-title {
+                font-size: 1rem;
+            }
+
+            .logo-watermark h1 {
+                font-size: 0.875rem !important;
+            }
+
+            /* Even smaller shield on very small screens */
+            .shield-glow {
+                width: 1.5rem !important;
+                height: 1.5rem !important;
+            }
+        }
     </style>
 </head>
 <body class="text-white">
-    <div class="max-w-full mx-auto px-6 py-8">
-        <!-- Header -->
-        <div class="flex items-start justify-between mb-8">
-            <!-- Logo Watermark Left -->
+    <div class="max-w-full mx-auto px-4 md:px-6 py-4 md:py-8">
+        <!-- Header Container -->
+        <div id="headerContainer" class="header-container mb-4 md:mb-8">
+            <!-- Logo Watermark as Background (Position Absolute - Lower position) -->
             <div class="logo-watermark">
-                <h1 class="text-2xl font-extrabold bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent whitespace-nowrap">
-                    PALANG IC
-                </h1>
+                <h1>PALANG IC</h1>
             </div>
 
-            <!-- Center Content -->
-            <div class="text-center flex-1">
-                <h2 class="text-5xl font-black mb-3 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent" style="line-height: 1.2;">
+            <!-- Main Header Content (Centered, above logo) -->
+            <div class="header-content-wrapper text-center">
+                <h2 class="text-3xl md:text-5xl font-black mb-2 md:mb-3 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent" style="line-height: 1.2;">
                     Palang IC
                 </h2>
-                <p class="text-slate-400 text-sm mb-2">Secure Your Documents with PALANG IC</p>
-                <p class="text-slate-500 text-xs mb-3 flex items-center justify-center gap-2">
+                <p class="text-slate-400 text-xs md:text-sm mb-2">Secure Your Documents with PALANG IC</p>
+                <p class="text-slate-500 text-xs mb-2 md:mb-3 flex items-center justify-center gap-2">
                     Made by Orang Melayu for the World 
-                    <svg class="w-4 h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-3 h-3 md:w-4 md:h-4 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clip-rule="evenodd"/>
                     </svg>
                 </p>
-                <div class="flex items-start justify-center gap-3 text-xs text-slate-400 max-w-2xl mx-auto">
-                    <svg class="w-8 h-8 text-green-500 flex-shrink-0 shield-glow" fill="currentColor" viewBox="0 0 20 20">
+
+                <!-- Privacy Info with Shield -->
+                <div class="privacy-info flex items-start justify-center gap-2 md:gap-3 text-xs text-slate-400 max-w-2xl mx-auto">
+                    <svg class="w-6 h-6 md:w-8 md:h-8 text-green-500 flex-shrink-0 shield-glow" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0110 1.944 11.954 11.954 0 0117.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
-                    <div class="text-center">
+                    <div class="privacy-info-text text-center text-xs md:text-sm">
                         <p>All your data is processed locally in your browser and never leaves your device.</p>
-                        <p>We don't store, collect, or transmit any of your personal information.</p>
+                        <p class="hidden md:block">We don't store, collect, or transmit any of your personal information.</p>
                         <p>100% secure and private.</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Right Spacer -->
-            <div class="w-32"></div>
         </div>
 
         <!-- Main Layout -->
         <div id="mainContainer" class="main-grid centered">
 
             <!-- LEFT SIDE: Upload/Preview -->
-            <div id="previewSection" class="space-y-4 upload-section-centered">
+            <div id="previewSection" class="space-y-3 md:space-y-4 upload-section-centered">
 
                 <!-- Front IC -->
-                <div class="glass-card rounded-2xl p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-semibold section-title">Front IC</h2>
-                        <button id="deleteFront" class="hidden btn-danger text-white text-xs font-medium py-2 px-3 rounded-lg flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="glass-card rounded-xl md:rounded-2xl p-4 md:p-6">
+                    <div class="flex items-center justify-between mb-3 md:mb-4">
+                        <h2 class="text-base md:text-lg font-semibold section-title">Front IC</h2>
+                        <button id="deleteFront" class="hidden btn-danger text-white text-xs font-medium py-1.5 px-2 md:py-2 md:px-3 rounded-lg flex items-center gap-1 md:gap-2">
+                            <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
                         </button>
                     </div>
 
-                    <div id="frontUploadArea" class="upload-area rounded-xl p-10 text-center cursor-pointer">
+                    <div id="frontUploadArea" class="upload-area rounded-xl p-6 md:p-10 text-center cursor-pointer">
                         <input type="file" id="frontUpload" accept="image/*" class="hidden">
                         <label for="frontUpload" class="cursor-pointer block pointer-events-none">
-                            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="upload-icon w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-3 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                                <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                 </svg>
                             </div>
@@ -459,36 +626,38 @@
                         </label>
                     </div>
 
-                    <div id="frontPreview" class="hidden mt-4">
-                        <div class="glass-card-light p-4 rounded-xl">
+                    <div id="frontPreview" class="hidden mt-3 md:mt-4">
+                        <div class="glass-card-light p-3 md:p-4 rounded-xl">
                             <canvas id="frontCanvas" class="w-full rounded-xl"></canvas>
                         </div>
-                        <button id="downloadFront" class="btn-primary mt-4 w-full text-white font-medium py-3 px-6 rounded-xl text-sm">
+                        <button id="downloadFront" class="btn-primary mt-3 md:mt-4 w-full text-white font-medium py-2.5 md:py-3 px-4 md:px-6 rounded-xl text-sm">
                             Download Front IC
                         </button>
                     </div>
                 </div>
 
                 <!-- BULK DOWNLOAD BUTTONS -->
-                <div id="bulkDownloadSection" class="hidden space-y-3">
+                <div id="bulkDownloadSection" class="hidden space-y-2 md:space-y-3">
                     <!-- First Row: Download Both & Download ZIP -->
-                    <div class="grid grid-cols-2 gap-3">
-                        <button id="downloadBothSeparate" class="btn-secondary text-white font-medium py-3 px-4 rounded-xl text-sm flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="grid grid-cols-2 gap-2 md:gap-3">
+                        <button id="downloadBothSeparate" class="btn-secondary text-white font-medium py-2.5 md:py-3 px-3 md:px-4 rounded-xl text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                             </svg>
-                            Download Both
+                            <span class="hidden sm:inline">Download Both</span>
+                            <span class="sm:hidden">Both</span>
                         </button>
-                        <button id="downloadBothZip" class="btn-secondary text-white font-medium py-3 px-4 rounded-xl text-sm flex items-center justify-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button id="downloadBothZip" class="btn-secondary text-white font-medium py-2.5 md:py-3 px-3 md:px-4 rounded-xl text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2">
+                            <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
                             </svg>
-                            Download ZIP
+                            <span class="hidden sm:inline">Download ZIP</span>
+                            <span class="sm:hidden">ZIP</span>
                         </button>
                     </div>
                     <!-- Second Row: Download PDF (Full Width) -->
-                    <button id="downloadPDF" class="w-full btn-secondary text-white font-medium py-3 px-4 rounded-xl text-sm flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button id="downloadPDF" class="w-full btn-secondary text-white font-medium py-2.5 md:py-3 px-3 md:px-4 rounded-xl text-xs md:text-sm flex items-center justify-center gap-1 md:gap-2">
+                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                         </svg>
                         Download as PDF
@@ -496,21 +665,21 @@
                 </div>
 
                 <!-- Back IC -->
-                <div class="glass-card rounded-2xl p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-semibold section-title">Back IC</h2>
-                        <button id="deleteBack" class="hidden btn-danger text-white text-xs font-medium py-2 px-3 rounded-lg flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="glass-card rounded-xl md:rounded-2xl p-4 md:p-6">
+                    <div class="flex items-center justify-between mb-3 md:mb-4">
+                        <h2 class="text-base md:text-lg font-semibold section-title">Back IC</h2>
+                        <button id="deleteBack" class="hidden btn-danger text-white text-xs font-medium py-1.5 px-2 md:py-2 md:px-3 rounded-lg flex items-center gap-1 md:gap-2">
+                            <svg class="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
                         </button>
                     </div>
 
-                    <div id="backUploadArea" class="upload-area rounded-xl p-10 text-center cursor-pointer">
+                    <div id="backUploadArea" class="upload-area rounded-xl p-6 md:p-10 text-center cursor-pointer">
                         <input type="file" id="backUpload" accept="image/*" class="hidden">
                         <label for="backUpload" class="cursor-pointer block pointer-events-none">
-                            <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="upload-icon w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-3 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                                <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                 </svg>
                             </div>
@@ -519,11 +688,11 @@
                         </label>
                     </div>
 
-                    <div id="backPreview" class="hidden mt-4">
-                        <div class="glass-card-light p-4 rounded-xl">
+                    <div id="backPreview" class="hidden mt-3 md:mt-4">
+                        <div class="glass-card-light p-3 md:p-4 rounded-xl">
                             <canvas id="backCanvas" class="w-full rounded-xl"></canvas>
                         </div>
-                        <button id="downloadBack" class="btn-primary mt-4 w-full text-white font-medium py-3 px-6 rounded-xl text-sm">
+                        <button id="downloadBack" class="btn-primary mt-3 md:mt-4 w-full text-white font-medium py-2.5 md:py-3 px-4 md:px-6 rounded-xl text-sm">
                             Download Back IC
                         </button>
                     </div>
@@ -533,11 +702,11 @@
 
             <!-- RIGHT SIDE: Settings -->
             <div id="settingsPanel" class="hidden">
-                <div class="settings-sticky glass-card rounded-2xl p-6">
-                    <h2 class="text-lg font-semibold mb-5 section-title">Watermark Settings</h2>
+                <div class="settings-sticky glass-card rounded-xl md:rounded-2xl p-4 md:p-6">
+                    <h2 class="text-base md:text-lg font-semibold mb-4 md:mb-5 section-title">Watermark Settings</h2>
 
-                    <div class="mb-5">
-                        <label class="block text-xs font-medium mb-3 text-slate-300">Quick Templates</label>
+                    <div class="mb-4 md:mb-5">
+                        <label class="block text-xs font-medium mb-2 md:mb-3 text-slate-300">Quick Templates</label>
                         <div class="grid grid-cols-2 gap-2">
                             <div class="template-option selected" data-template="FOR PRIVATE USE ONLY">
                                 FOR PRIVATE USE ONLY
@@ -560,12 +729,12 @@
                         </div>
                     </div>
 
-                    <div class="mb-5">
+                    <div class="mb-4 md:mb-5">
                         <label class="block text-xs font-medium mb-2 text-slate-300">Custom Text (Press Enter for 2nd line)</label>
-                        <textarea id="watermarkText" rows="2" placeholder="Enter watermark text..." class="w-full px-4 py-2.5 text-sm bg-slate-800/50 border border-slate-700/50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-slate-500 resize-none">FOR PRIVATE USE ONLY</textarea>
+                        <textarea id="watermarkText" rows="2" placeholder="Enter watermark text..." class="w-full px-3 md:px-4 py-2 md:py-2.5 text-sm bg-slate-800/50 border border-slate-700/50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-slate-500 resize-none">FOR PRIVATE USE ONLY</textarea>
                     </div>
 
-                    <div class="mb-5">
+                    <div class="mb-4 md:mb-5">
                         <label class="block text-xs font-medium mb-2 text-slate-300">Color</label>
                         <div class="flex gap-2 mb-3">
                             <div class="color-preset active bg-black" data-color="#000000" title="Black">
@@ -581,14 +750,14 @@
                                 <span class="text-white text-[10px] font-semibold">A</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 bg-slate-800/50 px-4 py-2.5 rounded-xl border border-slate-700/50">
+                        <div class="flex items-center gap-2 md:gap-3 bg-slate-800/50 px-3 md:px-4 py-2 md:py-2.5 rounded-xl border border-slate-700/50">
                             <label for="customColorPicker" class="text-xs text-slate-400 flex-shrink-0">Custom</label>
-                            <input type="color" id="customColorPicker" value="#000000" class="h-8 w-14 bg-transparent border-2 border-slate-600 rounded-lg cursor-pointer">
+                            <input type="color" id="customColorPicker" value="#000000" class="h-7 md:h-8 w-12 md:w-14 bg-transparent border-2 border-slate-600 rounded-lg cursor-pointer">
                             <span id="selectedColorHex" class="font-mono text-xs text-slate-300 ml-auto badge px-2 py-1 rounded-md">#000000</span>
                         </div>
                     </div>
 
-                    <div class="mb-5">
+                    <div class="mb-4 md:mb-5">
                         <div class="flex items-center justify-between mb-3">
                             <label class="text-xs font-medium text-slate-300">Text Background</label>
                             <div class="toggle-switch active" id="textBackgroundToggle">
@@ -596,56 +765,56 @@
                             </div>
                         </div>
                         <div id="textBackgroundControl" class="space-y-3">
-                            <div class="flex items-center gap-3 bg-slate-800/50 px-4 py-2.5 rounded-xl border border-slate-700/50">
+                            <div class="flex items-center gap-2 md:gap-3 bg-slate-800/50 px-3 md:px-4 py-2 md:py-2.5 rounded-xl border border-slate-700/50">
                                 <label for="bgColorPicker" class="text-xs text-slate-400 flex-shrink-0">BG Color</label>
-                                <input type="color" id="bgColorPicker" value="#FFFFFF" class="h-8 w-14 bg-transparent border-2 border-slate-600 rounded-lg cursor-pointer">
+                                <input type="color" id="bgColorPicker" value="#FFFFFF" class="h-7 md:h-8 w-12 md:w-14 bg-transparent border-2 border-slate-600 rounded-lg cursor-pointer">
                                 <span id="selectedBgColorHex" class="font-mono text-xs text-slate-300 ml-auto badge px-2 py-1 rounded-md">#FFFFFF</span>
                             </div>
                             <div>
                                 <div class="flex justify-between items-center mb-2">
                                     <label class="text-xs font-medium text-slate-400">BG Opacity</label>
-                                    <span id="bgOpacityValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">0.3</span>
+                                    <span id="bgOpacityValue" class="badge px-2 md:px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">0.3</span>
                                 </div>
                                 <input type="range" id="bgOpacity" min="0.1" max="1" step="0.1" value="0.3" class="w-full">
                             </div>
                         </div>
                     </div>
 
-                    <div class="mb-5">
+                    <div class="mb-4 md:mb-5">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-xs font-medium text-slate-300">Size</label>
-                            <span id="sizeValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">40px</span>
+                            <span id="sizeValue" class="badge px-2 md:px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">40px</span>
                         </div>
                         <input type="range" id="watermarkSize" min="20" max="120" value="40" class="w-full">
                     </div>
 
-                    <div class="mb-5">
+                    <div class="mb-4 md:mb-5">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-xs font-medium text-slate-300">Rotation</label>
-                            <span id="rotationValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">-45°</span>
+                            <span id="rotationValue" class="badge px-2 md:px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">-45°</span>
                         </div>
                         <input type="range" id="rotation" min="-180" max="180" value="-45" class="w-full">
                     </div>
 
-                    <div class="mb-5">
+                    <div class="mb-4 md:mb-5">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-xs font-medium text-slate-300">Opacity</label>
-                            <span id="opacityValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">1.0</span>
+                            <span id="opacityValue" class="badge px-2 md:px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">1.0</span>
                         </div>
                         <input type="range" id="opacity" min="0.1" max="1" step="0.1" value="1" class="w-full">
                     </div>
 
-                    <div class="mb-5">
+                    <div class="mb-4 md:mb-5">
                         <div class="flex justify-between items-center mb-2">
                             <label class="text-xs font-medium text-slate-300">Line Thickness</label>
-                            <span id="lineThicknessValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">7px</span>
+                            <span id="lineThicknessValue" class="badge px-2 md:px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">7px</span>
                         </div>
                         <input type="range" id="lineThickness" min="1" max="15" value="7" class="w-full">
                     </div>
 
-                    <div class="divider my-5"></div>
+                    <div class="divider my-4 md:my-5"></div>
 
-                    <div class="mb-5">
+                    <div class="mb-4 md:mb-5">
                         <div class="flex items-center justify-between mb-3">
                             <label class="text-xs font-medium text-slate-300">White Background</label>
                             <div class="toggle-switch active" id="whiteBackgroundToggle">
@@ -655,13 +824,13 @@
                         <div id="paddingControl">
                             <div class="flex justify-between items-center mb-2">
                                 <label class="text-xs font-medium text-slate-400">Padding</label>
-                                <span id="paddingValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">180px</span>
+                                <span id="paddingValue" class="badge px-2 md:px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">180px</span>
                             </div>
                             <input type="range" id="paddingSize" min="10" max="300" value="180" class="w-full">
                         </div>
                     </div>
 
-                    <div class="mb-5">
+                    <div class="mb-4 md:mb-5">
                         <div class="flex items-center justify-between mb-3">
                             <label class="text-xs font-medium text-slate-300">Rounded Corners</label>
                             <div class="toggle-switch active" id="roundedCornersToggle">
@@ -671,7 +840,7 @@
                         <div id="cornerRadiusControl">
                             <div class="flex justify-between items-center mb-2">
                                 <label class="text-xs font-medium text-slate-400">Corner Radius</label>
-                                <span id="cornerRadiusValue" class="badge px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">50px</span>
+                                <span id="cornerRadiusValue" class="badge px-2 md:px-3 py-1 rounded-full text-xs font-semibold" title="Click to edit">50px</span>
                             </div>
                             <input type="range" id="cornerRadius" min="5" max="100" value="50" class="w-full">
                         </div>
@@ -681,7 +850,7 @@
 
         </div>
 
-        <div class="text-center mt-8 space-y-2">
+        <div class="text-center mt-6 md:mt-8 space-y-2">
             <p class="text-slate-500 text-xs">🔒 Privacy First: All images are processed locally in your browser</p>
             <div class="flex items-center justify-center gap-2 text-xs text-slate-600">
                 <span>Need help?</span>
@@ -690,7 +859,21 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
+        // Scroll blur effect
+        window.addEventListener('scroll', function() {
+            var headerContainer = document.getElementById('headerContainer');
+            var scrollPosition = window.scrollY;
+
+            if (scrollPosition > 50) {
+                headerContainer.classList.add('scrolled');
+            } else {
+                headerContainer.classList.remove('scrolled');
+            }
+        });
+
         var frontImage = null;
         var backImage = null;
         var frontWatermarkPos = { x: 100, y: 100 };
@@ -863,8 +1046,56 @@
             return distance < 150;
         }
 
-        // DRAGGING FUNCTIONALITY
+        // DRAGGING FUNCTIONALITY (Desktop + Mobile touch)
         function setupCanvasDragging(canvas, side) {
+            // Touch support for mobile
+            canvas.addEventListener("touchstart", function(e) {
+                var touch = e.touches[0];
+                var coords = getCanvasCoordinates(canvas, touch.clientX, touch.clientY);
+                var pos = side === "front" ? frontWatermarkPos : backWatermarkPos;
+                var padding = whiteBackgroundEnabled ? parseInt(paddingSizeInput.value) : 0;
+                var adjustedX = whiteBackgroundEnabled ? pos.x + padding : pos.x;
+                var adjustedY = whiteBackgroundEnabled ? pos.y + padding : pos.y;
+
+                if (isMouseNearWatermark(coords.x, coords.y, adjustedX, adjustedY)) {
+                    isDragging = true;
+                    currentCanvas = side;
+                    dragOffsetX = coords.x - adjustedX;
+                    dragOffsetY = coords.y - adjustedY;
+                    e.preventDefault();
+                }
+            });
+
+            canvas.addEventListener("touchmove", function(e) {
+                if (isDragging && currentCanvas === side) {
+                    var touch = e.touches[0];
+                    var coords = getCanvasCoordinates(canvas, touch.clientX, touch.clientY);
+                    var padding = whiteBackgroundEnabled ? parseInt(paddingSizeInput.value) : 0;
+                    var newX = coords.x - dragOffsetX;
+                    var newY = coords.y - dragOffsetY;
+
+                    if (whiteBackgroundEnabled) {
+                        newX -= padding;
+                        newY -= padding;
+                    }
+
+                    if (side === "front") {
+                        frontWatermarkPos = { x: newX, y: newY };
+                        renderCanvas("front", frontImage);
+                    } else {
+                        backWatermarkPos = { x: newX, y: newY };
+                        renderCanvas("back", backImage);
+                    }
+                    e.preventDefault();
+                }
+            });
+
+            canvas.addEventListener("touchend", function(e) {
+                isDragging = false;
+                currentCanvas = null;
+            });
+
+            // Mouse support for desktop
             canvas.addEventListener("mousemove", function(e) {
                 var coords = getCanvasCoordinates(canvas, e.clientX, e.clientY);
                 var pos = side === "front" ? frontWatermarkPos : backWatermarkPos;
